@@ -1,5 +1,13 @@
 organization in ThisBuild := "io.circe"
 
+val scalaCheckDependencies = Seq(
+  "org.scalacheck" %% "scalacheck" % "1.14.0"
+)
+
+val disciplineDependencies = Seq(
+  "org.typelevel" %% "discipline-core" % "0.12.0-M3"
+)
+
 val testDependencies = Seq(
   "io.monix" %% "minitest" % "2.5.0",
   "io.monix" %% "minitest-laws" % "2.5.0"
@@ -13,9 +21,7 @@ val baseSettings = Seq(
 )
 
 val lawsSettings = Seq(
-  libraryDependencies ++= Seq(
-    "org.typelevel" %% "discipline-core" % "0.12.0-M3"
-  ).map(_.withDottyCompat(scalaVersion.value))
+  libraryDependencies ++= disciplineDependencies.map(_.withDottyCompat(scalaVersion.value))
 )
 
 val root =
@@ -55,3 +61,13 @@ lazy val catsTests = project
     libraryDependencies ++= testDependencies.map(_.withDottyCompat(scalaVersion.value))
   )
   .dependsOn(catsLaws, catsKernelLaws)
+
+lazy val circeNumbersTesting = project
+  .in(file("dotty-circe/numbers-testing"))
+  .settings(baseSettings)
+  .settings(libraryDependencies ++= scalaCheckDependencies.map(_.withDottyCompat(scalaVersion.value)))
+
+lazy val circeNumbers = project
+  .in(file("dotty-circe/numbers"))
+  .settings(baseSettings)
+  .dependsOn(circeNumbersTesting % Test)
