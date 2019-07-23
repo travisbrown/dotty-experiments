@@ -470,7 +470,7 @@ final object Printer {
    * The implementation is pretty much a regular growing char buffer that assumes all given
    * [[CharSequence]]s are just [[String]]s so both `toString` and `charAt` methods are cheap.
    */
-  private[circe] final class AppendableByteBuffer(
+  private final class AppendableByteBuffer(
     cs: Charset,
     sizePredictor: SizePredictor
   ) extends Appendable {

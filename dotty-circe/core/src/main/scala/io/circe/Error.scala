@@ -1,7 +1,8 @@
 package io.circe
 
-import cats.{ Eq, Show }
+import cats.Show
 import cats.data.NonEmptyList
+import cats.kernel.Eq
 
 /**
  * The base exception type for both decoding and parsing errors.

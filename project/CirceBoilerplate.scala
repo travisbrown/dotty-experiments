@@ -9,7 +9,7 @@ import sbt._
  * @author Miles Sabin
  * @author Kevin Wright
  */
-object Boilerplate {
+object CirceBoilerplate {
   import scala.StringContext._
 
   implicit class BlockHelper(val sc: StringContext) extends AnyVal {
@@ -106,13 +106,17 @@ object Boilerplate {
       import tv._
 
       val instances = synTypes.map(tpe => s"decode$tpe: Decoder[$tpe]").mkString(", ")
-      val applied = synTypes.zipWithIndex.map {
-        case (tpe, n) => s"decode$tpe.tryDecode(c.downN($n))"
-      }.mkString(", ")
+      val applied = synTypes.zipWithIndex
+        .map {
+          case (tpe, n) => s"decode$tpe.tryDecode(c.downN($n))"
+        }
+        .mkString(", ")
 
-      val accumulatingApplied = synTypes.zipWithIndex.map {
-        case (tpe, n) => s"decode$tpe.tryDecodeAccumulating(c.downN($n))"
-      }.mkString(", ")
+      val accumulatingApplied = synTypes.zipWithIndex
+        .map {
+          case (tpe, n) => s"decode$tpe.tryDecodeAccumulating(c.downN($n))"
+        }
+        .mkString(", ")
 
       val result =
         if (arity == 1) s"Decoder.resultInstance.map($applied)(Tuple1(_))"
@@ -123,11 +127,11 @@ object Boilerplate {
         else s"Decoder.accumulatingResultInstance.tuple$arity($accumulatingApplied)"
 
       block"""
-        |package io.circe
-        |
-        |import cats.data.Validated
-        |
-        |private[circe] trait TupleDecoders {
+      |package io.circe
+      |
+      |import cats.data.Validated
+      |
+      |private[circe] trait TupleDecoders {
         -  /**
         -   * @group Tuple
         -   */
@@ -143,7 +147,7 @@ object Boilerplate {
         -        case _ => Validated.invalidNel(DecodingFailure("${`(A..N)`}", c.history))
         -      }
         -    }
-        |}
+      |}
       """
     }
   }
@@ -157,14 +161,16 @@ object Boilerplate {
       import tv._
 
       val instances = synTypes.map(tpe => s"encode$tpe: Encoder[$tpe]").mkString(", ")
-      val applied = synTypes.zipWithIndex.map {
-        case (tpe, n) => s"encode$tpe(a._${n + 1})"
-      }.mkString(", ")
+      val applied = synTypes.zipWithIndex
+        .map {
+          case (tpe, n) => s"encode$tpe(a._${n + 1})"
+        }
+        .mkString(", ")
 
       block"""
-        |package io.circe
-        |
-        |private[circe] trait TupleEncoders {
+      |package io.circe
+      |
+      |private[circe] trait TupleEncoders {
         -  /**
         -   * @group Tuple
         -   */
@@ -172,7 +178,7 @@ object Boilerplate {
         -    new Encoder.AsArray[${`(A..N)`}] {
         -      final def encodeArray(a: ${`(A..N)`}): Vector[Json] = Vector($applied)
         -    }
-        |}
+      |}
       """
     }
   }
@@ -189,15 +195,15 @@ object Boilerplate {
       val tupleType = s"($tupleTypeList)"
 
       block"""
-        |package io.circe
-        |
-        |import io.circe.testing.CodecTests
-        |import io.circe.tests.CirceSuite
-        |
-        |class TupleCodecSuite extends CirceSuite {
-        |  checkLaws("Codec[Tuple1[Int]]", CodecTests[Tuple1[Int]].codec)
+      |package io.circe
+      |
+      |import io.circe.testing.CodecTests
+      |import io.circe.tests.CirceSuite
+      |
+      |class TupleCodecSuite extends CirceSuite {
+      |  checkLaws("Codec[Tuple1[Int]]", CodecTests[Tuple1[Int]].codec)
         -  checkLaws("Codec[$tupleType]", CodecTests[$tupleType].codec)
-        |}
+      |}
       """
     }
   }
@@ -226,9 +232,9 @@ object Boilerplate {
         else s"Decoder.accumulatingResultInstance.map$arity($accumulatingResults)(f)"
 
       block"""
-        |package io.circe
-        |
-        |private[circe] trait ProductDecoders {
+      |package io.circe
+      |
+      |private[circe] trait ProductDecoders {
         -  /**
         -   * @group Product
         -   */
@@ -241,7 +247,7 @@ object Boilerplate {
         -      override final def decodeAccumulating(c: HCursor): Decoder.AccumulatingResult[Target] =
         -        $accumulatingResult
         -    }
-        |}
+      |}
       """
     }
   }
@@ -259,16 +265,18 @@ object Boilerplate {
       val kvs =
         if (arity == 1) s"(name${synTypes.head}, encode${synTypes.head}(members))"
         else {
-          synTypes.zipWithIndex.map {
-            case (tpe, i) => s"(name$tpe, encode$tpe(members._${i + 1}))"
-          }.mkString(", ")
+          synTypes.zipWithIndex
+            .map {
+              case (tpe, i) => s"(name$tpe, encode$tpe(members._${i + 1}))"
+            }
+            .mkString(", ")
         }
       val outputType = if (arity != 1) s"Product$arity[${`A..N`}]" else `A..N`
 
       block"""
-        |package io.circe
-        |
-        |private[circe] trait ProductEncoders {
+      |package io.circe
+      |
+      |private[circe] trait ProductEncoders {
         -  /**
         -   * @group Product
         -   */
@@ -281,7 +289,7 @@ object Boilerplate {
         -        JsonObject.fromIterable(Vector($kvs))
         -      }
         -    }
-        |}
+      |}
       """
     }
   }
@@ -314,16 +322,18 @@ object Boilerplate {
       val kvs =
         if (arity == 1) s"(name${synTypes.head}, encode${synTypes.head}(members))"
         else {
-          synTypes.zipWithIndex.map {
-            case (tpe, i) => s"(name$tpe, encode$tpe(members._${i + 1}))"
-          }.mkString(", ")
+          synTypes.zipWithIndex
+            .map {
+              case (tpe, i) => s"(name$tpe, encode$tpe(members._${i + 1}))"
+            }
+            .mkString(", ")
         }
       val outputType = if (arity != 1) s"Product$arity[${`A..N`}]" else `A..N`
 
       block"""
-        |package io.circe
-        |
-        |private[circe] trait ProductCodecs {
+      |package io.circe
+      |
+      |private[circe] trait ProductCodecs {
         -  /**
         -   * @group Product
         -   */
@@ -342,7 +352,7 @@ object Boilerplate {
         -        JsonObject.fromIterable(Vector($kvs))
         -      }
         -    }
-        |}
+      |}
       """
     }
   }
@@ -362,14 +372,14 @@ object Boilerplate {
       val memberArbitraryItems = (0 until arity).map(i => s"s$i <- Arbitrary.arbitrary[String]").mkString("; ")
 
       block"""
-        |package io.circe
-        |
-        |import cats.kernel.Eq
-        |import io.circe.testing.CodecTests
-        |import io.circe.tests.CirceSuite
-        |import org.scalacheck.Arbitrary
-        |
-        |class ProductCodecSuite extends CirceSuite {
+      |package io.circe
+      |
+      |import cats.kernel.Eq
+      |import io.circe.testing.CodecTests
+      |import io.circe.tests.CirceSuite
+      |import org.scalacheck.Arbitrary
+      |
+      |class ProductCodecSuite extends CirceSuite {
         -  case class Cc$arity($members)
         -  object Cc$arity {
         -    implicit val eqCc$arity: Eq[Cc$arity] = Eq.fromUniversalEquals
@@ -396,7 +406,7 @@ object Boilerplate {
         -    "Codec[Cc$arity] via Encoder and Codec",
         -    CodecTests[Cc$arity](Cc$arity.codecForCc$arity, Cc$arity.encodeCc$arity).unserializableCodec
         -  )
-        |}
+      |}
       """
     }
   }

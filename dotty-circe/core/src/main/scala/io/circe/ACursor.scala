@@ -265,7 +265,7 @@ abstract class ACursor(private val lastCursor: HCursor, private val lastOp: Curs
 }
 
 final object ACursor {
-  private[this] val jsonOptionEq: Eq[Option[Json]] = cats.kernel.instances.option.catsKernelStdEqForOption(Json.eqJson)
+  private[this] val jsonOptionEq: Eq[Option[Json]] = the[Eq[Option[Json]]]
 
   implicit val eqACursor: Eq[ACursor] =
     Eq.instance((a, b) => jsonOptionEq.eqv(a.focus, b.focus) && CursorOp.eqCursorOpList.eqv(a.history, b.history))

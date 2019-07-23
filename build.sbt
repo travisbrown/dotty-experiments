@@ -28,8 +28,8 @@ val root =
   project
     .in(file("."))
     .settings(baseSettings)
-    .aggregate(catsKernel, catsKernelLaws, catsCore, catsLaws, catsTests)
-    .dependsOn(catsLaws)
+    .aggregate(catsKernel, catsKernelLaws, catsCore, catsLaws, catsTests, circeNumbersTesting, circeNumbers, circeCore)
+    .dependsOn(catsLaws, circeCore)
 
 lazy val catsKernel = project
   .in(file("dotty-cats/kernel"))
@@ -45,8 +45,8 @@ lazy val catsKernelLaws = project
 lazy val catsCore = project
   .in(file("dotty-cats/core"))
   .settings(baseSettings)
-  .dependsOn(catsKernel)
   .settings(sourceGenerators in Compile += (sourceManaged in Compile).map(CatsBoilerplate.gen).taskValue)
+  .dependsOn(catsKernel)
 
 lazy val catsLaws = project
   .in(file("dotty-cats/laws"))
@@ -71,3 +71,9 @@ lazy val circeNumbers = project
   .in(file("dotty-circe/numbers"))
   .settings(baseSettings)
   .dependsOn(circeNumbersTesting % Test)
+
+lazy val circeCore = project
+  .in(file("dotty-circe/core"))
+  .settings(baseSettings)
+  .settings(sourceGenerators in Compile += (sourceManaged in Compile).map(CirceBoilerplate.gen).taskValue)
+  .dependsOn(circeNumbers, catsCore)

@@ -1,7 +1,8 @@
 package io.circe
 
-import cats.{ ApplicativeError, Semigroup }
+import cats.ApplicativeError
 import cats.data.NonEmptyList
+import cats.kernel.Semigroup
 
 @deprecated("Use Decoder", "0.12.0")
 final object AccumulatingDecoder {

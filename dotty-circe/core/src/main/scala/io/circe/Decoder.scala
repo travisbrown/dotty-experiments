@@ -14,9 +14,8 @@ import cats.data.{
   ValidatedNel
 }
 import cats.data.Validated.{ Invalid, Valid }
-import cats.instances.either.{ catsStdInstancesForEither, catsStdSemigroupKForEither }
 import cats.kernel.Order
-import io.circe.export.Exported
+import io.circe.exported.Exported
 import java.io.Serializable
 import java.time.{
   DateTimeException,
@@ -428,7 +427,7 @@ final object Decoder
   /**
    * @group Instances
    */
-  final val resultInstance: MonadError[Result, DecodingFailure] = catsStdInstancesForEither[DecodingFailure]
+  final val resultInstance: MonadError[Result, DecodingFailure] = the[MonadError[Result, DecodingFailure]]
 
   /**
    * @group Instances
@@ -438,7 +437,7 @@ final object Decoder
       NonEmptyList.catsDataSemigroupForNonEmptyList[DecodingFailure]
     )
 
-  private[circe] val resultSemigroupK: SemigroupK[Result] = catsStdSemigroupKForEither[DecodingFailure]
+  private[circe] val resultSemigroupK: SemigroupK[Result] = SemigroupK[[x] =>> Either[DecodingFailure, x]]
 
   private[this] abstract class DecoderWithFailure[A](name: String) extends Decoder[A] {
     final def fail(c: HCursor): Result[A] = Left(DecodingFailure(name, c.history))
@@ -1026,7 +1025,7 @@ final object Decoder
   implicit final def decodeNonEmptySet[A](implicit decodeA: Decoder[A], orderA: Order[A]): Decoder[NonEmptySet[A]] =
     new NonEmptySeqDecoder[A, SortedSet, NonEmptySet[A]](decodeA) {
       final protected def createBuilder(): Builder[A, SortedSet[A]] =
-        SortedSet.newBuilder[A](Order.catsKernelOrderingForOrder(orderA))
+        SortedSet.newBuilder[A](orderA.toOrdering)
       final protected val create: (A, SortedSet[A]) => NonEmptySet[A] =
         (h, t) => NonEmptySet(h, t)
     }
@@ -1042,7 +1041,7 @@ final object Decoder
   ): Decoder[NonEmptyMap[K, V]] =
     new MapDecoder[K, V, SortedMap](decodeK, decodeV) {
       final protected def createBuilder(): Builder[(K, V), SortedMap[K, V]] =
-        SortedMap.newBuilder[K, V](Order.catsKernelOrderingForOrder(orderK))
+        SortedMap.newBuilder[K, V](orderK.toOrdering)
     }.emap { map =>
       NonEmptyMap.fromMap(map)(orderK).toRight("[K, V]NonEmptyMap[K, V]")
     }
@@ -1384,32 +1383,6 @@ final object Decoder
         final def apply(c: HCursor): Result[B] = step(c, a)
       }
     }
-
-  /**
-   * {{{
-   *   object WeekDay extends Enumeration { ... }
-   *   implicit val weekDayDecoder = Decoder.decodeEnumeration(WeekDay)
-   * }}}
-   *
-   * @group Utilities
-   */
-  final def decodeEnumeration[E <: Enumeration](enum: E): Decoder[E#Value] =
-    Decoder.decodeString.flatMap { str =>
-      Decoder.instanceTry { _ =>
-        Try(enum.withName(str))
-      }
-    }
-
-  /**
-   * {{{
-   *   object WeekDay extends Enumeration { ... }
-   *   implicit val weekDayDecoder = Decoder.enumDecoder(WeekDay)
-   * }}}
-   *
-   * @group Utilities
-   */
-  @deprecated("Use decodeEnumeration", "0.12.0")
-  final def enumDecoder[E <: Enumeration](enum: E): Decoder[E#Value] = decodeEnumeration[E](enum)
 
   /**
    * Helper methods for working with [[cats.data.StateT]] values that transform

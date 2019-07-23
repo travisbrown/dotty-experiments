@@ -1,6 +1,7 @@
 package io.circe
 
-import cats.{ Applicative, Eq, Foldable, Show }
+import cats.{ Applicative, Foldable, Show }
+import cats.kernel.Eq
 import cats.data.Kleisli
 import java.io.Serializable
 import java.util.LinkedHashMap

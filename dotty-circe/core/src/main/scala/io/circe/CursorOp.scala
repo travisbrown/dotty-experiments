@@ -1,6 +1,7 @@
 package io.circe
 
-import cats.{ Eq, Show }
+import cats.Show
+import cats.kernel.Eq
 import java.io.Serializable
 
 sealed abstract class CursorOp extends Product with Serializable {
@@ -64,7 +65,7 @@ final object CursorOp {
 
   implicit final val eqCursorOp: Eq[CursorOp] = Eq.fromUniversalEquals
 
-  val eqCursorOpList: Eq[List[CursorOp]] = cats.instances.list.catsKernelStdEqForList[CursorOp]
+  val eqCursorOpList: Eq[List[CursorOp]] = the[Eq[List[CursorOp]]]
 
   /**
    * Represents JavaScript-style selections into a JSON structure.

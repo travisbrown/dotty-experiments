@@ -1,6 +1,7 @@
 package io.circe
 
-import cats.{ Eq, Show }
+import cats.Show
+import cats.kernel.Eq
 import io.circe.numbers.BiggerDecimal
 import java.io.Serializable
 import scala.collection.mutable.ListBuffer
