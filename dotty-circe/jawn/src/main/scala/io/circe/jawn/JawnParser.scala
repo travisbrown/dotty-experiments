@@ -1,7 +1,7 @@
 package io.circe.jawn
 
-import cats.data.ValidatedNel
 import io.circe.{ Decoder, Error, Json, Parser, ParsingFailure }
+import io.circe.cats.data.ValidatedNel
 import java.io.File
 import java.nio.ByteBuffer
 import scala.util.{ Failure, Success, Try }

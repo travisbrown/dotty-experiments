@@ -28,8 +28,16 @@ val root =
   project
     .in(file("."))
     .settings(baseSettings)
-    .aggregate(catsKernel, catsKernelLaws, catsCore, catsLaws, catsTests, circeNumbersTesting, circeNumbers, circeCore)
-    .dependsOn(catsLaws, circeCore)
+    .aggregate(catsKernel,
+               catsKernelLaws,
+               catsCore,
+               catsLaws,
+               catsTests,
+               circeNumbersTesting,
+               circeNumbers,
+               circeCore,
+               circeJawn)
+    .dependsOn(catsLaws, circeJawn)
 
 lazy val catsKernel = project
   .in(file("dotty-cats/kernel"))
@@ -77,3 +85,11 @@ lazy val circeCore = project
   .settings(baseSettings)
   .settings(sourceGenerators in Compile += (sourceManaged in Compile).map(CirceBoilerplate.gen).taskValue)
   .dependsOn(circeNumbers, catsCore)
+
+lazy val circeJawn = project
+  .in(file("dotty-circe/jawn"))
+  .settings(baseSettings)
+  .settings(
+    libraryDependencies += ("org.typelevel" %% "jawn-parser" % "0.14.2").withDottyCompat(scalaVersion.value)
+  )
+  .dependsOn(circeCore)
