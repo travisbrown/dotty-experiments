@@ -148,6 +148,8 @@ trait FlatMap[F[_]] extends Apply[F] {
 object FlatMap {  
   def apply[F[_]] given (F: FlatMap[F]): FlatMap[F] = F
 
+  given [F[_]] as FlatMap[F] given (F: Monad[F]) = F
+
   given [K] as FlatMap[[x] =>> SortedMap[K, x]] given Order[K] = io.circe.cats.instances.SortedMapInstance[K]
 
   private[cats] trait Ops {
