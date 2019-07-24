@@ -14,5 +14,6 @@ trait CommutativeMonad[F[_]] extends Monad[F] with CommutativeFlatMap[F] with Co
 object CommutativeMonad {
 	def apply[F[_]] given (F: CommutativeMonad[F]): CommutativeMonad[F] = F
 
+  given as CommutativeMonad[Id] = io.circe.cats.instances.IdInstance
   given as CommutativeMonad[Option] = io.circe.cats.instances.OptionInstance
 }

@@ -38,6 +38,8 @@ trait Compose[F[_, _]] { self =>
 object Compose {  
   def apply[F[_, _]] given (F: Compose[F]): Compose[F] = F
 
+  given [F[_, _]] as Compose[F] given (F: Category[F]) = F
+
   given as Compose[Map] {
     /**
      * Compose two maps `g` and `f` by using the values in `f` as keys for `g`.

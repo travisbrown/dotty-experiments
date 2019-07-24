@@ -91,6 +91,8 @@ trait NonEmptyTraverse[F[_]] extends Traverse[F] with Reducible[F] { self =>
 object NonEmptyTraverse {
   def apply[F[_]] given (F: NonEmptyTraverse[F]): NonEmptyTraverse[F] = F
 
+  given as NonEmptyTraverse[Id] = io.circe.cats.instances.IdInstance
+
   private[cats] trait Ops {
     given [F[_], A] {
       def (fa: F[A]) nonEmptyTraverse[G[_], B](f: A => G[B]) given (F: NonEmptyTraverse[F], G: Apply[G]): G[F[B]] = F.nonEmptyTraverse(fa)(f)

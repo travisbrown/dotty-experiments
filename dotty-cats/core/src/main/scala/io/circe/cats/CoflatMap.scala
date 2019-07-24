@@ -47,6 +47,8 @@ trait CoflatMap[F[_]] extends Functor[F] {
 object CoflatMap {
   def apply[F[_]] given (F: CoflatMap[F]): CoflatMap[F] = F
 
+  given [F[_]] as CoflatMap[F] given (F: Comonad[F]) = F
+
   given as CoflatMap[List] = io.circe.cats.instances.ListInstance
   given as CoflatMap[Vector] = io.circe.cats.instances.VectorInstance
   given as CoflatMap[Stream] = io.circe.cats.instances.StreamInstance

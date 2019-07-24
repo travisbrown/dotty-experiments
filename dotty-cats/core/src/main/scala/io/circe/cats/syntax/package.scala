@@ -91,10 +91,10 @@ private trait OrderOps {
 private trait PartialOrderOps {
   given [A] given (A: PartialOrder[A]) {
     // Currently produce ClassFormatErrors.
-    //def (a: A) >(b: A): Boolean = A.gt(a, b)
-    //def (a: A) >=(b: A): Boolean = A.gteqv(a, b)
-    //def (a: A) <(b: A): Boolean = A.lt(a, b)
-    //def (a: A) <=(b: A): Boolean = A.lteqv(a, b)
+    def (a: A) >(b: A): Boolean = A.gt(a, b)
+    def (a: A) >=(b: A): Boolean = A.gteqv(a, b)
+    def (a: A) <(b: A): Boolean = A.lt(a, b)
+    def (a: A) <=(b: A): Boolean = A.lteqv(a, b)
 
     def (a: A) partialCompare(b: A): Double = A.partialCompare(a, b)
     def (a: A) tryCompare(b: A): Option[Int] = A.tryCompare(a, b)

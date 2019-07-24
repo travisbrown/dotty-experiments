@@ -14,13 +14,13 @@ trait ArrowLaws[F[_, _]] given (F: Arrow[F]) extends CategoryLaws[F] with Strong
     F.lift(identity[A]) <-> F.id[A]
 
   def arrowComposition[A, B, C](f: A => B, g: B => C): IsEq[F[A, C]] =
-    F.lift(f.andThen(g)) <-> F.andThen(F.lift(f), F.lift(g))
+    F.lift(f >>> g) <-> (F.lift(f) >>> F.lift(g))
 
   def arrowExtension[A, B, C](g: A => B): IsEq[F[(A, C), (B, C)]] =
     F.first[A, B, C](F.lift(g)) <-> F.lift(g.split(identity[C]))
 
   def arrowFunctor[A, B, C, D](f: F[A, B], g: F[B, C]): IsEq[F[(A, D), (C, D)]] =
-    F.first[A, C, D](f >>> g) <-> F.andThen(f.first[D], g.first[D])
+    (f >>> g).first[D] <-> (f.first[D] >>> g.first[D])
 
   def arrowExchange[A, B, C, D](f: F[A, B], g: C => D): IsEq[F[(A, C), (B, D)]] =
     F.andThen(f.first[C], F.lift((identity[B]).split(g))) <-> (F.lift((identity[A] _).split(g)).andThen(f.first[D]))

@@ -9,7 +9,7 @@ import given io.circe.cats.syntax.compose._
  */
 trait ComposeLaws[F[_, _]] given (F: Compose[F]) {
   def composeAssociativity[A, B, C, D](fab: F[A, B], fbc: F[B, C], fcd: F[C, D]): IsEq[F[A, D]] =
-    F.andThen(fab.andThen(fbc), fcd) <-> fab.andThen(fbc.andThen(fcd))
+    ((fab >>> fbc) >>> fcd) <-> (fab >>> (fbc >>> fcd))
 }
 
 object ComposeLaws {

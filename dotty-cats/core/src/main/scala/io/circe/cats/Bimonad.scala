@@ -7,6 +7,8 @@ trait Bimonad[F[_]] extends Monad[F] with Comonad[F]
 object Bimonad {
   def apply[F[_]] given (F: Bimonad[F]): Bimonad[F] = F
 
+  given as Bimonad[Id] = io.circe.cats.instances.IdInstance
+
   given as Bimonad[Function0] {
     def extract[A](x: () => A): A = x()
 

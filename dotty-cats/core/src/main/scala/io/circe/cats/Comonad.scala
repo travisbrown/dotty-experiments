@@ -29,6 +29,7 @@ trait Comonad[F[_]] extends CoflatMap[F] {
 object Comonad {
   def apply[F[_]] given (F: Comonad[F]): Comonad[F] = F
 
+  given as Comonad[Id] = io.circe.cats.instances.IdInstance
   given [A] as Comonad[[x] =>> (A, x)] = io.circe.cats.instances.Tuple2Instance[A]
 
   private[cats] trait Ops {

@@ -133,6 +133,8 @@ trait Traverse[F[_]] extends Functor[F] with Foldable[F] with UnorderedTraverse[
 object Traverse {
   def apply[F[_]] given (F: Traverse[F]): Traverse[F] = F
 
+  given [F[_]] as Traverse[F] given (F: NonEmptyTraverse[F]) = F
+
   given as Traverse[List] = io.circe.cats.instances.ListInstance
   given as Traverse[Vector] = io.circe.cats.instances.VectorInstance
   given as Traverse[Stream] = io.circe.cats.instances.StreamInstance
