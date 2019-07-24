@@ -163,6 +163,7 @@ object Functor {
   private[cats] trait Ops {
     given [F[_], A] {
       def (fa: F[A]) map[B](f: A => B) given (F: Functor[F]): F[B] = F.map(fa)(f)
+      def (fa: F[A]) widen[B >: A]: F[B] = fa.asInstanceOf[F[B]]
     }
   }
 }

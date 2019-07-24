@@ -37,8 +37,11 @@ val root =
                circeNumbersTesting,
                circeNumbers,
                circeCore,
-               circeJawn)
-    .dependsOn(catsLaws, circeJawn)
+               circeRs,
+               circeJawn,
+               circeTesting,
+               circeTests)
+    .dependsOn(circeJawn, circeTesting)
 
 lazy val catsKernel = project
   .in(file("dotty-cats/kernel"))
@@ -87,6 +90,11 @@ lazy val circeCore = project
   .settings(sourceGenerators in Compile += (sourceManaged in Compile).map(CirceBoilerplate.gen).taskValue)
   .dependsOn(circeNumbers, catsCore)
 
+lazy val circeRs = project
+  .in(file("dotty-circe/rs"))
+  .settings(baseSettings)
+  .dependsOn(circeCore)
+
 lazy val circeJawn = project
   .in(file("dotty-circe/jawn"))
   .settings(baseSettings)
@@ -94,3 +102,17 @@ lazy val circeJawn = project
     libraryDependencies += ("org.typelevel" %% "jawn-parser" % "0.14.2").withDottyCompat(scalaVersion.value)
   )
   .dependsOn(circeCore)
+
+lazy val circeTesting = project
+  .in(file("dotty-circe/testing"))
+  .settings(baseSettings)
+  .settings(libraryDependencies ++= scalaCheckDependencies.map(_.withDottyCompat(scalaVersion.value)))
+  .dependsOn(circeNumbersTesting, circeRs, catsLaws)
+
+lazy val circeTests = project
+  .in(file("dotty-circe/tests"))
+  .settings(baseSettings)
+  .settings(
+    libraryDependencies ++= testDependencies.map(_.withDottyCompat(scalaVersion.value))
+  )
+  .dependsOn(circeTesting, circeJawn)

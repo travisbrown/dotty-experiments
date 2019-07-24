@@ -1,7 +1,6 @@
 package io.circe
 
 import io.circe.cats.kernel.{Monoid, Semigroup}
-import scala.annotation.tailrec
 
 /**
  * Symbolic aliases for various types are defined here.

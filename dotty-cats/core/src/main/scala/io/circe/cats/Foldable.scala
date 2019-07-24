@@ -599,24 +599,24 @@ object Foldable {
   given as Foldable[SortedSet] = io.circe.cats.instances.SortedSetInstance
 
   private[cats] trait Ops {
-    given [F[_], A] given (F: Foldable[F]) {
-      def (fa: F[A]) foldLeft[B](b: B)(f: (B, A) => B): B = F.foldLeft(fa, b)(f)
-      def (fa: F[A]) foldRight[B](b: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = F.foldRight(fa, b)(f)
-      def (fa: F[A]) reduceLeftToOption[B](f: A => B)(g: (B, A) => B): Option[B] = F.reduceLeftToOption(fa)(f)(g)
-      def (fa: F[A]) reduceRightToOption[B](f: A => B)(g: (A, Eval[B]) => Eval[B]): Eval[Option[B]] = F.reduceRightToOption(fa)(f)(g)
-      def (fa: F[A]) reduceLeftOption(f: (A, A) => A): Option[A] = F.reduceLeftOption(fa)(f)
-      def (fa: F[A]) reduceRightOption(f: (A, Eval[A]) => Eval[A]): Eval[Option[A]] = F.reduceRightOption(fa)(f)
-      def (fa: F[A]) minimumOption given Order[A]: Option[A] = F.minimumOption(fa)
-      def (fa: F[A]) maximumOption given Order[A]: Option[A] = F.maximumOption(fa)
-      def (fa: F[A]) get(idx: Long): Option[A] = F.get(fa)(idx)      
-      def (fa: F[A]) collectFirst[B](pf: PartialFunction[A, B]): Option[B] = F.collectFirst(fa)(pf)
-      def (fa: F[A]) collectFirstSome[B](f: A => Option[B]): Option[B] = F.collectFirstSome(fa)(f)
-      def (fa: F[A]) fold given Monoid[A]: A = F.fold(fa)
-      def (fa: F[A]) foldMap[B](f: A => B) given Monoid[B]: B = F.foldMap(fa)(f)
-      def (fa: F[A]) foldM[G[_], B](z: B)(f: (B, A) => G[B]) given Monad[G]: G[B] = F.foldM(fa, z)(f)
-      def (fa: F[A]) foldMapM[G[_], B](f: A => G[B]) given Monad[G], Monoid[B]: G[B] = F.foldMapM(fa)(f)
-      def (fa: F[A]) traverse_[G[_], B](f: A => G[B]) given Applicative[G]: G[Unit] = F.traverse_(fa)(f)
-      def (fa: F[A]) find(f: A => Boolean): Option[A] = F.find(fa)(f)
+    given [F[_], A] {
+      def (fa: F[A]) foldLeft[B](b: B)(f: (B, A) => B) given (F: Foldable[F]): B = F.foldLeft(fa, b)(f)
+      def (fa: F[A]) foldRight[B](b: Eval[B])(f: (A, Eval[B]) => Eval[B]) given (F: Foldable[F]): Eval[B] = F.foldRight(fa, b)(f)
+      def (fa: F[A]) reduceLeftToOption[B](f: A => B)(g: (B, A) => B) given (F: Foldable[F]): Option[B] = F.reduceLeftToOption(fa)(f)(g)
+      def (fa: F[A]) reduceRightToOption[B](f: A => B)(g: (A, Eval[B]) => Eval[B]) given (F: Foldable[F]): Eval[Option[B]] = F.reduceRightToOption(fa)(f)(g)
+      def (fa: F[A]) reduceLeftOption(f: (A, A) => A) given (F: Foldable[F]): Option[A] = F.reduceLeftOption(fa)(f)
+      def (fa: F[A]) reduceRightOption(f: (A, Eval[A]) => Eval[A]) given (F: Foldable[F]): Eval[Option[A]] = F.reduceRightOption(fa)(f)
+      def (fa: F[A]) minimumOption given Order[A] given (F: Foldable[F]): Option[A] = F.minimumOption(fa)
+      def (fa: F[A]) maximumOption given Order[A] given (F: Foldable[F]): Option[A] = F.maximumOption(fa)
+      def (fa: F[A]) get(idx: Long) given (F: Foldable[F]): Option[A] = F.get(fa)(idx)      
+      def (fa: F[A]) collectFirst[B](pf: PartialFunction[A, B]) given (F: Foldable[F]): Option[B] = F.collectFirst(fa)(pf)
+      def (fa: F[A]) collectFirstSome[B](f: A => Option[B]) given (F: Foldable[F]): Option[B] = F.collectFirstSome(fa)(f)
+      def (fa: F[A]) fold given (F: Foldable[F], A: Monoid[A]): A = F.fold(fa)
+      def (fa: F[A]) foldMap[B](f: A => B) given (F: Foldable[F], B: Monoid[B]): B = F.foldMap(fa)(f)
+      def (fa: F[A]) foldM[G[_], B](z: B)(f: (B, A) => G[B]) given (F: Foldable[F], G: Monad[G]): G[B] = F.foldM(fa, z)(f)
+      def (fa: F[A]) foldMapM[G[_], B](f: A => G[B]) given (F: Foldable[F], G: Monad[G], B: Monoid[B]): G[B] = F.foldMapM(fa)(f)
+      def (fa: F[A]) traverse_[G[_], B](f: A => G[B]) given (F: Foldable[F], G: Applicative[G]): G[Unit] = F.traverse_(fa)(f)
+      def (fa: F[A]) find(f: A => Boolean) given (F: Foldable[F]): Option[A] = F.find(fa)(f)
     }
 
     given [F[_], G[_], A] given (F: Foldable[F]) {
