@@ -413,6 +413,44 @@ final object Decoder
     with ProductDecoders
     with LiteralDecoders
     with LowPriorityDecoders {
+  import scala.deriving.{ Mirror, productElement }
+  import scala.compiletime.{Shape, constValue, erasedValue, error}
+
+  private val alwaysUnitDecoder: Decoder[Unit] = Decoder.const(())
+
+  inline def derived[A] given (A: Mirror.Of[A]): Decoder[A] =
+      inline A match {
+        case m: Mirror.ProductOf[A] => decodeElems[m.MirroredElemTypes, m.MirroredElemLabels](0).map(p => m.fromProduct(p.asInstanceOf[Product]))
+      }
+
+  inline def tryDecoder[A]: Decoder[A] = delegate match {
+    case decodeElem: Decoder[A] => decodeElem
+    case _ => error("No `Decoder` delegate was found for $A")
+  }
+
+  inline def decodeElems[Elems <: Tuple, Labels <: Tuple](n: Int): Decoder[Elems] = {
+    inline erasedValue[Elems] match {
+      case _: (elem *: elems1) =>
+        inline erasedValue[Labels] match {
+          case _: (label *: labels1) =>
+            val decodeHead = tryDecoder[elem].prepare(_.downField(constValue[label].asInstanceOf[String]))
+            val decodeTail = decodeElems[elems1, labels1](n + 1)
+
+            new Decoder[Elems] {
+              final def apply(c: HCursor): Result[Elems] =
+                decodeHead(c) match {
+                  case Right(h) => decodeTail(c).map(t => (h *: t).asInstanceOf[Elems])
+                  case l @ Left(_) => l.asInstanceOf[Result[Elems]]
+                }
+              override def decodeAccumulating(c: HCursor): AccumulatingResult[Elems] =
+                decodeHead.decodeAccumulating(c).ap(
+                  decodeTail.decodeAccumulating(c).map(t => (h: elem) => (h *: t).asInstanceOf[Elems])
+                )
+            }
+        }
+      case _: Unit => alwaysUnitDecoder.asInstanceOf[Decoder[Elems]]
+    }
+  }
 
   /**
    * @group Aliases

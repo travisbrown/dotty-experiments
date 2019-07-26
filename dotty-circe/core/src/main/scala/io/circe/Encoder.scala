@@ -106,6 +106,34 @@ trait Encoder[A] extends Serializable { self =>
  * @author Travis Brown
  */
 final object Encoder extends TupleEncoders with ProductEncoders with LiteralEncoders with MidPriorityEncoders {
+  import scala.deriving.{ Mirror, productElement }
+  import scala.compiletime.{Shape, constValue, erasedValue, error}
+
+  inline def derived[A] given (A: Mirror.Of[A]): ObjectEncoder[A] = new ObjectEncoder[A] {
+    def encodeObject(a: A): JsonObject = {
+      inline A match {
+        case m: Mirror.ProductOf[A] => encodeElems[m.MirroredElemTypes, m.MirroredElemLabels](a, 0)
+      }
+    }
+  }
+
+  inline def tryEncode[A](a: A): Json = delegate match {
+    case encodeElem: Encoder[A] => encodeElem(a)
+    case _ => error("No `ObjectEncoder` delegate was found for $A")
+  }
+
+  inline def encodeElems[Elems <: Tuple, Labels <: Tuple](a: Any, n: Int): JsonObject = {
+    inline erasedValue[Elems] match {
+      case _: (elem *: elems1) =>
+        inline erasedValue[Labels] match {
+          case _: (label *: labels1) =>
+            val j: Json = tryEncode(productElement[elem](a, n))
+            encodeElems[elems1, labels1](a, n + 1).add(constValue[label].asInstanceOf[String], j)
+
+        }
+      case _: Unit => JsonObject.empty
+    }
+  }
 
   /**
    * Return an instance for a given type `A`.
