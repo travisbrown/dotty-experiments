@@ -103,6 +103,11 @@ lazy val circeJawn = project
   )
   .dependsOn(circeCore)
 
+lazy val circeLiteral = project
+  .in(file("dotty-circe/literal"))
+  .settings(baseSettings)
+  .dependsOn(circeCore, circeJawn)
+
 lazy val circeTesting = project
   .in(file("dotty-circe/testing"))
   .settings(baseSettings)
