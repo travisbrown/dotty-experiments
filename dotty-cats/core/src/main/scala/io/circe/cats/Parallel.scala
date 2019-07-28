@@ -313,13 +313,9 @@ object Parallel {
    * in which case parallel composition will actually be sequential.
    */
   def identity[M[_]] given (M: Monad[M]): Parallel[M, M] = new Parallel[M, M] {
-
     val monad: Monad[M] = M
-
     val applicative: Applicative[M] = M
-
     val sequential: M ~> M = FunctionK.id
-
     val parallel: M ~> M = FunctionK.id
   }
 }

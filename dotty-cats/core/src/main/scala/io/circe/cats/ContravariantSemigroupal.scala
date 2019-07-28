@@ -22,8 +22,6 @@ object ContravariantSemigroupal {
   def semigroup[F[_], A] given ContravariantSemigroupal[F]: Semigroup[F[A]] =
     new ContravariantSemigroupalSemigroup[F, A]
 
-  given [F[_]] as ContravariantSemigroupal[F] given (F: ContravariantMonoidal[F]) = F
-
   private[cats] trait Ops extends TupleContravariantSemigroupalSyntax
 }
 

@@ -183,8 +183,6 @@ trait ApplicativeError[F[_], E] extends Applicative[F] {
 object ApplicativeError {
   def apply[F[_], E] given (F: ApplicativeError[F, E]): ApplicativeError[F, E] = F
 
-  given [F[_], E] as ApplicativeError[F, E] given (F: MonadError[F, E]) = F
-
   final private[cats] class LiftFromOptionPartially[F[_]](private val dummy: Boolean = true) extends AnyVal {
     def apply[E, A](oa: Option[A], ifEmpty: => E) given (F: ApplicativeError[F, _ >: E]): F[A] =
       oa match {

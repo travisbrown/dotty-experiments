@@ -35,30 +35,4 @@ object InvariantMonoidal {
     new InvariantSemigroupalSemigroup[F, A] with Monoid[F[A]] {
       def empty: F[A] = F.point(A.empty)
     }
-
-  given as InvariantMonoidal[Semigroup] {
-    def product[A, B](fa: Semigroup[A], fb: Semigroup[B]): Semigroup[(A, B)] = new Semigroup[(A, B)] {
-      def combine(x: (A, B), y: (A, B)): (A, B) = fa.combine(x._1, y._1) -> fb.combine(x._2, y._2)
-    }
-
-    def imap[A, B](fa: Semigroup[A])(f: A => B)(g: B => A): Semigroup[B] = new Semigroup[B] {
-      def combine(x: B, y: B): B = f(fa.combine(g(x), g(y)))
-    }
-
-    def unit: Semigroup[Unit] = the[Semigroup[Unit]]
-  }
-
-  given as InvariantMonoidal[CommutativeSemigroup] {
-    def product[A, B](fa: CommutativeSemigroup[A], fb: CommutativeSemigroup[B]): CommutativeSemigroup[(A, B)] =
-      new CommutativeSemigroup[(A, B)] {
-        def combine(x: (A, B), y: (A, B)): (A, B) = fa.combine(x._1, y._1) -> fb.combine(x._2, y._2)
-      }
-
-    def imap[A, B](fa: CommutativeSemigroup[A])(f: A => B)(g: B => A): CommutativeSemigroup[B] =
-      new CommutativeSemigroup[B] {
-        def combine(x: B, y: B): B = f(fa.combine(g(x), g(y)))
-      }
-
-    def unit: CommutativeSemigroup[Unit] = the[CommutativeSemigroup[Unit]]
-  }
 }

@@ -64,9 +64,4 @@ trait Alternative[F[_]] extends Applicative[F] with MonoidK[F] { self =>
 
 object Alternative {
   def apply[F[_]] given (F: Alternative[F]): Alternative[F] = F
-
-  given as Alternative[List] = io.circe.cats.instances.ListInstance
-  given as Alternative[Vector] = io.circe.cats.instances.VectorInstance
-  given as Alternative[Stream] = io.circe.cats.instances.StreamInstance
-  given as Alternative[Option] = io.circe.cats.instances.OptionInstance
 }

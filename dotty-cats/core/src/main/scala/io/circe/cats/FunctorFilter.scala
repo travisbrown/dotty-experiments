@@ -1,5 +1,8 @@
 package io.circe.cats
 
+import io.circe.cats.kernel.Order
+import scala.collection.immutable.SortedMap
+
 /**
  * `FunctorFilter[F]` allows you to `map` and filter out elements simultaneously.
  */
@@ -68,7 +71,11 @@ trait FunctorFilter[F[_]] extends Serializable {
 object FunctorFilter {
   def apply[F[_]] given (F: FunctorFilter[F]): FunctorFilter[F] = F
 
-  given [F[_]] as FunctorFilter[F] given (F: TraverseFilter[F]) = F
+  given as TraverseFilter[List] = io.circe.cats.instances.ListInstance
+  given as TraverseFilter[Vector] = io.circe.cats.instances.VectorInstance
+  given as TraverseFilter[Stream] = io.circe.cats.instances.StreamInstance
+  given as TraverseFilter[Option] = io.circe.cats.instances.OptionInstance
+  given [K] as TraverseFilter[[x] =>> SortedMap[K, x]] given Order[K] = io.circe.cats.instances.SortedMapInstance[K]
 
   private[cats] trait Ops {
     given [F[_], A] given (F: FunctorFilter[F]) {

@@ -133,15 +133,8 @@ trait Traverse[F[_]] extends Functor[F] with Foldable[F] with UnorderedTraverse[
 object Traverse {
   def apply[F[_]] given (F: Traverse[F]): Traverse[F] = F
 
-  given [F[_]] as Traverse[F] given (F: NonEmptyTraverse[F]) = F
-
-  given as Traverse[List] = io.circe.cats.instances.ListInstance
-  given as Traverse[Vector] = io.circe.cats.instances.VectorInstance
-  given as Traverse[Stream] = io.circe.cats.instances.StreamInstance
-  given as Traverse[Option] = io.circe.cats.instances.OptionInstance
   given [A] as Traverse[[x] =>> Either[A, x]] = io.circe.cats.instances.EitherInstance[A]
   given [K] as Traverse[[x] =>> SortedMap[K, x]] given Order[K] = io.circe.cats.instances.SortedMapInstance[K]
-  given [A] as Traverse[[x] =>> (A, x)] = io.circe.cats.instances.Tuple2Instance[A]
 
   private[cats] trait Ops {
     given [F[_], A] {

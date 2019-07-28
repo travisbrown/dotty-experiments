@@ -81,40 +81,6 @@ private[cats] trait ComposedBitraverse[F[_, _], G[_, _]]
 object Bitraverse {  
   def apply[F[_, _]] given (F: Bitraverse[F]): Bitraverse[F] = F
 
-  given as Bitraverse[Either] {
-    def bitraverse[G[_], A, B, C, D](fab: Either[A, B])(f: A => G[C],
-                                                          g: B => G[D]) given (G: Applicative[G]): G[Either[C, D]] =
-      fab match {
-        case Left(a)  => G.map(f(a))(Left(_))
-        case Right(b) => G.map(g(b))(Right(_))
-      }
-
-    def bifoldLeft[A, B, C](fab: Either[A, B], c: C)(f: (C, A) => C, g: (C, B) => C): C =
-      fab match {
-        case Left(a)  => f(c, a)
-        case Right(b) => g(c, b)
-      }
-
-    def bifoldRight[A, B, C](fab: Either[A, B], c: Eval[C])(f: (A, Eval[C]) => Eval[C],
-                                                              g: (B, Eval[C]) => Eval[C]): Eval[C] =
-      fab match {
-        case Left(a)  => f(a, c)
-        case Right(b) => g(b, c)
-      }
-  }
-
-  given as Bitraverse[Tuple2] {
-    def bitraverse[G[_], A, B, C, D](fab: (A, B))(f: A => G[C], g: B => G[D]) given (G: Applicative[G]): G[(C, D)] =
-      G.tuple2(f(fab._1), g(fab._2))
-  
-    def bifoldLeft[A, B, C](fab: (A, B), c: C)(f: (C, A) => C, g: (C, B) => C): C =
-      g(f(c, fab._1), fab._2)
-  
-    def bifoldRight[A, B, C](fab: (A, B), c: Eval[C])(f: (A, Eval[C]) => Eval[C],
-                                                      g: (B, Eval[C]) => Eval[C]): Eval[C] =
-      g(fab._2, f(fab._1, c))
-  }
-
   private[cats] trait Ops {    
     given [F[_, _], A, B] given (F: Bitraverse[F]) {
       def (fab: F[A, B]) bitraverse[G[_],C, D](f: A => G[C], g: B => G[D]) given Applicative[G]: G[F[C, D]] = F.bitraverse(fab)(f, g)

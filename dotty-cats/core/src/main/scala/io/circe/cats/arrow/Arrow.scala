@@ -70,8 +70,6 @@ trait Arrow[F[_, _]] extends Category[F] with Strong[F] { self =>
 object Arrow {
   def apply[F[_, _]] given (F: Arrow[F]): Arrow[F] = F
 
-  given [F[_, _]] as Arrow[F] given (F: ArrowChoice[F]) = F
-
   private[cats] trait Ops {
     given [F[_, _], A, B] {
       def (f: F[A, B]) split[C, D](g: F[C, D]) given (F: Arrow[F]): F[(A, C), (B, D)] = F.split(f, g)

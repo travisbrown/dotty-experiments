@@ -1,5 +1,7 @@
 package io.circe.cats
 
+import io.circe.cats.kernel.{CommutativeSemigroup, Eq, Monoid, Order, PartialOrder, Semigroup}
+
 /**
  * [[Semigroupal]] captures the idea of composing independent effectful values.
  * It is of particular interest when taken together with [[Functor]] - where [[Functor]]
@@ -43,8 +45,22 @@ trait Semigroupal[F[_]] extends Serializable {
 object Semigroupal extends SemigroupalArityFunctions {
    def apply[F[_]] given (F: Semigroupal[F]): Semigroupal[F] = F
 
-  given [F[_]] as Semigroupal[F] given (F: InvariantSemigroupal[F]) = F
-  
+  given as Semigroupal[Option] = io.circe.cats.instances.OptionInstance
+  given as Semigroupal[List] = io.circe.cats.instances.ListInstance
+  given as Semigroupal[Vector] = io.circe.cats.instances.VectorInstance
+  given as Semigroupal[Stream] = io.circe.cats.instances.StreamInstance
+
+  given [R] as Semigroupal[[x] =>> x => R] given (R: Monoid[R]) = the[ContravariantMonoidal[[x] =>> x => R]]
+  given as Semigroupal[Eq] = the[ContravariantMonoidal[Eq]]
+  given as Semigroupal[Equiv] = the[ContravariantMonoidal[Equiv]]
+  given as Semigroupal[Order] = the[ContravariantMonoidal[Order]]
+  given as Semigroupal[Ordering] = the[ContravariantMonoidal[Ordering]]
+  given as Semigroupal[PartialOrder] = the[ContravariantMonoidal[PartialOrder]]
+  given as Semigroupal[PartialOrdering] = the[ContravariantMonoidal[PartialOrdering]]
+
+  given as Semigroupal[Semigroup] = the[InvariantMonoidal[Semigroup]]
+  given as Semigroupal[CommutativeSemigroup] = the[InvariantMonoidal[CommutativeSemigroup]]
+
   private[cats] trait Ops {
     given [F[_], A] given (F: Semigroupal[F]) {
       def (fa: F[A]) product[B](fb: F[B]): F[(A, B)] = F.product(fa, fb)

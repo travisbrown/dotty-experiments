@@ -1,15 +1,16 @@
 package io.circe.cats
 
-import io.circe.cats.kernel.CommutativeMonoid
+import io.circe.cats.kernel.{CommutativeMonoid, Order}
+import scala.collection.immutable.{SortedMap, SortedSet}
 
 /**
  * `UnorderedFoldable` is like a `Foldable` for unordered containers.
  */
 trait UnorderedFoldable[F[_]] {
 
-  def unorderedFoldMap[A, B: CommutativeMonoid](fa: F[A])(f: A => B): B
+  def unorderedFoldMap[A, B](fa: F[A])(f: A => B) given CommutativeMonoid[B]: B
 
-  def unorderedFold[A: CommutativeMonoid](fa: F[A]): A =
+  def unorderedFold[A](fa: F[A]) given CommutativeMonoid[A]: A =
     unorderedFoldMap(fa)(identity)
 
   /**
@@ -27,7 +28,7 @@ trait UnorderedFoldable[F[_]] {
    * If there are no elements, the result is `false`.
    */
   def exists[A](fa: F[A])(p: A => Boolean): Boolean =
-    unorderedFoldMap(fa)(a => Eval.later(p(a)))(UnorderedFoldable.orEvalMonoid).value
+    (unorderedFoldMap(fa)(a => Eval.later(p(a))) given UnorderedFoldable.orEvalMonoid).value
 
   /**
    * Check whether all elements satisfy the predicate.
@@ -35,7 +36,7 @@ trait UnorderedFoldable[F[_]] {
    * If there are no elements, the result is `true`.
    */
   def forall[A](fa: F[A])(p: A => Boolean): Boolean =
-    unorderedFoldMap(fa)(a => Eval.later(p(a)))(UnorderedFoldable.andEvalMonoid).value
+    (unorderedFoldMap(fa)(a => Eval.later(p(a))) given UnorderedFoldable.andEvalMonoid).value
 
   /**
    * The size of this UnorderedFoldable.
@@ -45,11 +46,22 @@ trait UnorderedFoldable[F[_]] {
    *
    * Note: will not terminate for infinite-sized collections.
    */
-  def size[A](fa: F[A]): Long = unorderedFoldMap(fa)(_ => 1L)(CommutativeMonoid.instance(0, _ + _))
+  def size[A](fa: F[A]): Long = unorderedFoldMap(fa)(_ => 1L) given CommutativeMonoid.instance(0, _ + _)
 }
 
 object UnorderedFoldable {
   def apply[F[_]] given (F: UnorderedFoldable[F]): UnorderedFoldable[F] = F
+
+  given as NonEmptyTraverse[Id] = io.circe.cats.instances.IdInstance
+  given as Traverse[Option] = io.circe.cats.instances.OptionInstance
+  given as Traverse[List] = io.circe.cats.instances.ListInstance
+  given as Traverse[Vector] = io.circe.cats.instances.VectorInstance
+  given as Traverse[Stream] = io.circe.cats.instances.StreamInstance
+  given as UnorderedTraverse[Set] = io.circe.cats.instances.SetInstance
+  given as Foldable[SortedSet] = io.circe.cats.instances.SortedSetInstance
+  given [K] as Traverse[[x] =>> SortedMap[K, x]] given Order[K] = io.circe.cats.instances.SortedMapInstance[K]
+
+  given [A] as (Reducible[[x] =>> (A, x)] & Traverse[[x] =>> (A, x)]) = io.circe.cats.instances.Tuple2Instance[A]
 
   private[cats] trait Ops {
     given [F[_], A] given (F: UnorderedFoldable[F]) {

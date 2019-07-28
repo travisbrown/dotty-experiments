@@ -16,8 +16,6 @@ trait CommutativeApplicative[F[_]] extends Applicative[F] with CommutativeApply[
 object CommutativeApplicative {
   def apply[F[_]] given (F: CommutativeApplicative[F]): CommutativeApplicative[F] = F
 
-  given [F[_]] as CommutativeApplicative[F] given (F: CommutativeMonad[F]) = F
-
   def commutativeMonoidFor[F[_], A] given (F: CommutativeApplicative[F], A: CommutativeMonoid[A]): CommutativeMonoid[F[A]] =
     new CommutativeMonoid[F[A]] {
       override def empty: F[A] =

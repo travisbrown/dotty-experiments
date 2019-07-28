@@ -39,8 +39,6 @@ trait Strong[F[_, _]] extends Profunctor[F] {
 object Strong {
   def apply[F[_, _]] given (F: Strong[F]): Strong[F] = F
 
-  given [F[_, _]] as Strong[F] given (F: Arrow[F]) = F
-
   private[cats] trait Ops {
     given [F[_, _], A, B] {
       def (fab: F[A, B]) first[C] given (F: Strong[F]): F[(A, C), (B, C)] = F.first(fab)

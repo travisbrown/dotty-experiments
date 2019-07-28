@@ -1,5 +1,7 @@
 package io.circe.cats
 
+import io.circe.cats.arrow.Category
+import io.circe.cats.data.AndThen
 import io.circe.cats.kernel.Semigroup
 
 /**
@@ -71,7 +73,20 @@ trait SemigroupK[F[_]] extends Serializable { self =>
 object SemigroupK {
   def apply[F[_]] given (F: SemigroupK[F]): SemigroupK[F] = F
 
-  given [F[_]] as SemigroupK[F] given (F: MonoidK[F]) = F
+  given as MonoidK[Option] = io.circe.cats.instances.OptionInstance
+  given as MonoidK[List] = io.circe.cats.instances.ListInstance
+  given as MonoidK[Vector] = io.circe.cats.instances.VectorInstance
+  given as MonoidK[Stream] = io.circe.cats.instances.StreamInstance
+  given as MonoidK[Set] = io.circe.cats.instances.SetInstance
+
+  given as MonoidK[Endo] {
+    val category: Category[Function1] = the[Category[Function1]]
+
+    override def empty[A]: Endo[A] = category.id
+
+    override def combineK[A](x: Endo[A], y: Endo[A]): Endo[A] =
+      AndThen(category.compose(x, y))
+  }
 
   given [A] as SemigroupK[[x] =>> Either[A, x]] = io.circe.cats.instances.EitherInstance[A]
 }

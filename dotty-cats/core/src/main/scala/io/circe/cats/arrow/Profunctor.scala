@@ -39,6 +39,8 @@ trait Profunctor[F[_, _]] { self =>
 }
 
 object Profunctor {
+  given as Strong[Function1] = io.circe.cats.instances.Function1Instance
+
   private[cats] trait Ops {
     given [F[_, _], A, B] {
       def (fab: F[A, B]) dimap[C, D](f: C => A)(g: B => D) given (F: Profunctor[F]): F[C, D] = F.dimap(fab)(f)(g)

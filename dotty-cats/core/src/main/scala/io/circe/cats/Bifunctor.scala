@@ -81,6 +81,9 @@ abstract private class RightFunctor[F[_, _], X] extends Functor[[x] =>> F[X, x]]
 object Bifunctor {  
   def apply[F[_, _]] given (F: Bifunctor[F]): Bifunctor[F] = F
 
+  given as Bifunctor[Either] = the[Bitraverse[Either]]
+  given as Bifunctor[Tuple2] = the[Bitraverse[Tuple2]]
+
   private[cats] trait Ops {    
     given [F[_, _], A, B] given (F: Bifunctor[F]) {
       def (fab: F[A, B]) bimap[C, D](f: A => C, g: B => D): F[C, D] = F.bimap(fab)(f, g)

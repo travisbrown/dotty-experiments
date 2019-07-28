@@ -38,7 +38,7 @@ trait Compose[F[_, _]] { self =>
 object Compose {  
   def apply[F[_, _]] given (F: Compose[F]): Compose[F] = F
 
-  given [F[_, _]] as Compose[F] given (F: Category[F]) = F
+  given as ArrowChoice[Function1] = io.circe.cats.instances.Function1Instance
 
   given as Compose[Map] {
     /**

@@ -12,6 +12,4 @@ trait UnorderedTraverse[F[_]] extends UnorderedFoldable[F] {
 
 object UnorderedTraverse {
   def apply[F[_]] given (F: UnorderedTraverse[F]): UnorderedTraverse[F] = F
-
-  given as UnorderedTraverse[Set] = io.circe.cats.instances.SetInstance
 }

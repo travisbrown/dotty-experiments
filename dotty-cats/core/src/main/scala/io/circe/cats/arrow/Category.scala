@@ -25,6 +25,4 @@ trait Category[F[_, _]] extends Compose[F] { self =>
 
 object Category {  
   def apply[F[_, _]] given (F: Category[F]): Category[F] = F
-
-  given [F[_, _]] as Category[F] given (F: Arrow[F]) = F
 }

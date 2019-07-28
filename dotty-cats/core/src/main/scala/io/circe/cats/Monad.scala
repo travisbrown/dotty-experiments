@@ -115,17 +115,8 @@ trait Monad[F[_]] extends FlatMap[F] with Applicative[F] {
 
 }
 
-object Monad extends LowPriorityMonadInstances {
+object Monad {
   def apply[F[_]] given (F: Monad[F]): Monad[F] = F
-
-  given [F[_]] as Monad[F] given (F: Bimonad[F]) = F
-  given [F[_], E] as Monad[F] given (F: MonadError[F, E]) = F
-
-  given as Monad[List] = io.circe.cats.instances.ListInstance
-  given as Monad[Vector] = io.circe.cats.instances.VectorInstance
-  given as Monad[Stream] = io.circe.cats.instances.StreamInstance
-  given as Monad[Option] = io.circe.cats.instances.OptionInstance
-  given [I] as Monad[[x] =>> I => x] = io.circe.cats.instances.Function1InstanceR[I]
 
   private[cats] trait Ops {    
     given [F[_], A] {
@@ -142,7 +133,4 @@ object Monad extends LowPriorityMonadInstances {
       def (a: A) iterateUntilM[F[_]](f: A => F[A])(p: A => Boolean) given (F: Monad[F]): F[A] = F.iterateUntilM(a)(f)(p)
     }
   }
-}
-
-private class LowPriorityMonadInstances {
 }

@@ -1,7 +1,5 @@
 package io.circe.cats
 
-import io.circe.cats.arrow.Category
-import io.circe.cats.data.AndThen
 import io.circe.cats.kernel.Monoid
 
 /**
@@ -55,17 +53,4 @@ trait MonoidK[F[_]] extends SemigroupK[F] { self =>
 
 object MonoidK {
   def apply[F[_]] given (F: MonoidK[F]): MonoidK[F] = F
-
-  given [F[_]] as MonoidK[F] given (F: Alternative[F]) = F
-
-  given as MonoidK[Set] = io.circe.cats.instances.SetInstance
-
-  given as MonoidK[Endo] {
-    val category: Category[Function1] = the[Category[Function1]]
-
-    override def empty[A]: Endo[A] = category.id
-
-    override def combineK[A](x: Endo[A], y: Endo[A]): Endo[A] =
-      AndThen(category.compose(x, y))
-  }
 }

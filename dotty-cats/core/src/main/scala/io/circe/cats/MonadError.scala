@@ -69,7 +69,4 @@ trait MonadError[F[_], E] extends ApplicativeError[F, E] with Monad[F] {
 
 object MonadError {
   def apply[F[_], E] given (F: MonadError[F, E]): MonadError[F, E] = F
-
-  given [A] as MonadError[[x] =>> Either[A, x], A] = io.circe.cats.instances.EitherInstance[A]
-  given as MonadError[Option, Unit] = io.circe.cats.instances.OptionInstance
 }

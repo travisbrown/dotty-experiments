@@ -25,9 +25,6 @@ object InvariantSemigroupal {
   def semigroup[F[_], A] given InvariantSemigroupal[F], Semigroup[A]: Semigroup[F[A]] =
     new InvariantSemigroupalSemigroup[F, A]
 
-  given [F[_]] as InvariantSemigroupal[F] given (F: ContravariantSemigroupal[F]) = F
-  given [F[_]] as InvariantSemigroupal[F] given (F: Apply[F]) = F
-
   given as InvariantSemigroupal[Monoid] {
     def product[A, B](fa: Monoid[A], fb: Monoid[B]): Monoid[(A, B)] = new Monoid[(A, B)] {
       val empty = fa.empty -> fb.empty

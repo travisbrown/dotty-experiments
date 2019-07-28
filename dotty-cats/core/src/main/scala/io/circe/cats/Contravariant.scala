@@ -33,20 +33,6 @@ trait Contravariant[F[_]] extends Invariant[F] { self =>
 object Contravariant {
   def apply[F[_]] given (F: Contravariant[F]): Contravariant[F] = F
 
-  given [F[_]] as Contravariant[F] given (F: ContravariantSemigroupal[F]) = F
-
-  given as Contravariant[Hash] {
-      /**
-       * Derive a `Hash` for `B` given an `Hash[A]` and a function `B => A`.
-       */
-    def contramap[A, B](A: Hash[A])(f: B => A): Hash[B] = Hash.by(f) given A
-  }
-
-  given [R] as Contravariant[[x] =>> x => R] {
-    def contramap[A, B](fa: A => R)(f: B => A): B => R =
-      fa.compose(f)
-  }
-
   private[cats] trait Ops {
     given [F[_], A] given (F: Contravariant[F]) {
       def (fa: F[A]) contramap[B](f: B => A): F[B] = F.contramap(fa)(f)

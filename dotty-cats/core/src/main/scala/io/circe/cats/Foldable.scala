@@ -594,10 +594,6 @@ object Foldable {
 
   def apply[F[_]] given (F: Foldable[F]): Foldable[F] = F
 
-  given [F[_]] as Foldable[F] given (F: Traverse[F]) = F
-
-  given as Foldable[SortedSet] = io.circe.cats.instances.SortedSetInstance
-
   private[cats] trait Ops {
     given [F[_], A] {
       def (fa: F[A]) foldLeft[B](b: B)(f: (B, A) => B) given (F: Foldable[F]): B = F.foldLeft(fa, b)(f)

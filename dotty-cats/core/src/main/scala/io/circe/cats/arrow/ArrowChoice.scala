@@ -41,8 +41,6 @@ trait ArrowChoice[F[_, _]] extends Arrow[F] with Choice[F] { self =>
 object ArrowChoice {
   def apply[F[_, _]] given (F: ArrowChoice[F]): ArrowChoice[F] = F
 
-  given as ArrowChoice[Function1] = io.circe.cats.instances.Function1Instance
-
   private[cats] trait Ops {
     given [F[_, _], A, B] {
       def (f: F[A, B]) choose[C, D](g: F[C, D]) given (F: ArrowChoice[F]): F[Either[A, C], Either[B, D]] = F.choose(f)(g)

@@ -192,26 +192,6 @@ object Applicative {
   def monoid[F[_], A] given Applicative[F], Monoid[A]: Monoid[F[A]] =
     new ApplicativeMonoid[F, A]
 
-  given [F[_]] as Applicative[F] given (F: Monad[F]) = F
-
-  /**
-   * Creates an applicative functor for `F`, holding domain fixed and combining
-   * over the codomain.
-   *
-   * Example:
-   * {{{
-   * scala> import cats.implicits._
-   * scala> import cats.Applicative.catsApplicativeForArrow
-   * scala> val toLong: Int => Long = _.toLong
-   * scala> val double: Int => Int = 2*_
-   * scala> val f: Int => (Long, Int) = catsApplicativeForArrow.product(toLong, double)
-   * scala> f(3)
-   * res0: (Long, Int) = (3,6)
-   * }}}
-   */
-  given [F[_, _], A] as Applicative[[x] =>> F[A, x]] given (F: Arrow[F]) =
-    new ArrowApplicative[F, A]
-
   /**
    * Creates a CoflatMap for an Applicative `F`.
    *

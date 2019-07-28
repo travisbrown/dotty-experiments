@@ -220,8 +220,6 @@ trait Reducible[F[_]] extends Foldable[F] { self =>
 object Reducible {
   def apply[F[_]] given (F: Reducible[F]): Reducible[F] = F
 
-  given [A] as Reducible[[x] =>> (A, x)] = io.circe.cats.instances.Tuple2Instance[A]
-
   private[cats] trait Ops {
     given [F[_], A] given (F: Reducible[F]) {
       def (fa: F[A]) reduceLeft(f: (A, A) => A): A = F.reduceLeft(fa)(f)

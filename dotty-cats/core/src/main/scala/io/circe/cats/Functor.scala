@@ -158,8 +158,6 @@ trait Functor[F[_]] extends Invariant[F] { self =>
 object Functor {
   def apply[F[_]] given (F: Functor[F]): Functor[F] = F
 
-  given [F[_]] as Functor[F] given (F: Apply[F]) = F
-
   private[cats] trait Ops {
     given [F[_], A] {
       def (fa: F[A]) map[B](f: A => B) given (F: Functor[F]): F[B] = F.map(fa)(f)

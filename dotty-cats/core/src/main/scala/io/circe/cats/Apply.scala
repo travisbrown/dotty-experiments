@@ -203,10 +203,8 @@ trait Apply[F[_]] extends Functor[F] with InvariantSemigroupal[F] with ApplyArit
 
 }
 
-object Apply extends LowPriorityApplyInstances {
+object Apply {
   def apply[F[_]] given (F: Apply[F]): Apply[F] = F
-
-  given [F[_]] as Apply[F] given (F: Applicative[F]) = F
 
   /**
    * This semigroup uses a product operation to combine `F`s.
@@ -222,10 +220,6 @@ object Apply extends LowPriorityApplyInstances {
       def (ff: F[A => B]) ap(fa: F[A]): F[B] = F.ap(ff)(fa)
     }
   }
-}
-
-private class LowPriorityApplyInstances {
-  given [F[_]] as Apply[F] given (F: FlatMap[F]) = F
 }
 
 private[cats] class ApplySemigroup[F[_], A] given (F: Apply[F], A: Semigroup[A]) extends Semigroup[F[A]] {

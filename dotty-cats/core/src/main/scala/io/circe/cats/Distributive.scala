@@ -23,10 +23,6 @@ trait Distributive[F[_]] extends Functor[F] { self =>
 object Distributive {
   def apply[F[_]] given (F: Distributive[F]): Distributive[F] = F
 
-  given as Distributive[Id] = io.circe.cats.instances.IdInstance
-  given as Distributive[Function0] = io.circe.cats.instances.Function0Instance
-  given [I] as Distributive[[x] =>> I => x] = io.circe.cats.instances.Function1InstanceR[I]
-
   private[cats] trait Ops {
     given [G[_], A] {
       def (ga: G[A]) distribute[F[_], B](f: A => F[B]) given (G: Functor[G], F: Distributive[F]): F[G[B]] = F.distribute(ga)(f)
