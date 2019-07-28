@@ -1,9 +1,9 @@
 package io.circe.cats.syntax
 
-import io.circe.cats.{ Applicative, Apply, Bifoldable, Bifunctor, Bitraverse, CoflatMap, Comonad, Contravariant, ContravariantSemigroupal, Distributive, FlatMap, Foldable, Functor, FunctorFilter, Invariant, Monad, NonEmptyTraverse, Reducible, Semigroupal, Show, Traverse, TraverseFilter, UnorderedFoldable }
-import io.circe.cats.arrow.{ Arrow, ArrowChoice, Choice, Compose, Profunctor, Strong }
+import io.circe.cats.{Applicative, Apply, Bifoldable, Bifunctor, Bitraverse, CoflatMap, Comonad, Contravariant, ContravariantSemigroupal, Distributive, FlatMap, Foldable, Functor, FunctorFilter, Invariant, Monad, NonEmptyTraverse, Reducible, Semigroupal, Show, Traverse, TraverseFilter, UnorderedFoldable, UnorderedTraverse}
+import io.circe.cats.arrow.{Arrow, ArrowChoice, Choice, Compose, Profunctor, Strong}
 import io.circe.cats.data.{NonEmptyChain, NonEmptyList, Writer}
-import io.circe.cats.kernel.{ Comparison, Eq, Hash, Monoid, Order, PartialOrder, Semigroup }
+import io.circe.cats.kernel.{Comparison, Eq, Hash, Monoid, Order, PartialOrder, Semigroup}
 import scala.annotation.alpha
 import scala.collection.immutable.{SortedMap, SortedSet}
 
@@ -45,6 +45,7 @@ object strong extends Strong.Ops
 object traverse extends Traverse.Ops
 object traverseFilter extends TraverseFilter.Ops
 object unorderedFoldable extends UnorderedFoldable.Ops
+object unorderedTraverse extends UnorderedTraverse.Ops
 object writer extends WriterOps
 object all extends Applicative.Ops with Apply.Ops with Arrow.Ops with ArrowChoice.Ops
   with Bifoldable.Ops with Bifunctor.Ops with Bitraverse.Ops with Choice.Ops with CoflatMap.Ops with Comonad.Ops
@@ -53,7 +54,7 @@ object all extends Applicative.Ops with Apply.Ops with Arrow.Ops with ArrowChoic
   with NonEmptyTraverse.Ops
   with OptionOps with OrderOps with PartialOrderOps
   with Profunctor.Ops with Reducible.Ops with SemigroupOps with Semigroupal.Ops with Show.Ops with Strong.Ops with Traverse.Ops with TraverseFilter.Ops
-  with UnorderedFoldable.Ops with WriterOps
+  with UnorderedFoldable.Ops with UnorderedTraverse.Ops with WriterOps
 
 private trait SemigroupOps {
   given [A] {

@@ -77,10 +77,10 @@ trait NonEmptyTraverse[F[_]] extends Traverse[F] with Reducible[F] { self =>
   def nonEmptyFlatSequence[G[_], A](fgfa: F[G[F[A]]]) given (G: Apply[G], F: FlatMap[F]): G[F[A]] =
     G.map(nonEmptyTraverse(fgfa)(identity))(F.flatten)
 
-  override def traverse[G[_]: Applicative, A, B](fa: F[A])(f: (A) => G[B]): G[F[B]] =
+  override def traverse[G[_], A, B](fa: F[A])(f: (A) => G[B]) given Applicative[G]: G[F[B]] =
     nonEmptyTraverse(fa)(f)
 
-  def compose[G[_]: NonEmptyTraverse]: NonEmptyTraverse[[α] =>> F[G[α]]] =
+  def compose[G[_]] given NonEmptyTraverse[G]: NonEmptyTraverse[[x] =>> F[G[x]]] =
     new ComposedNonEmptyTraverse[F, G] {
       val F = self
       val G = NonEmptyTraverse[G]

@@ -387,7 +387,7 @@ sealed abstract class Chain[+A] {
    * equality provided by Eq[_] instances, rather than using the
    * universal equality provided by .equals.
    */
-  def ===[AA >: A](that: Chain[AA])(implicit A: Eq[AA]): Boolean =
+  def ===[AA >: A](that: Chain[AA]) given (A: Eq[AA]): Boolean =
     (this eq that) || {
       val iterX = iterator
       val iterY = that.iterator
@@ -438,7 +438,7 @@ sealed abstract class Chain[+A] {
 
   override def equals(o: Any): Boolean =
     if (o.isInstanceOf[Chain[_]])
-      (this: Chain[Any]).===(o.asInstanceOf[Chain[Any]])(Eq.fromUniversalEquals[Any])
+      (this: Chain[Any]).===(o.asInstanceOf[Chain[Any]]) given Eq.fromUniversalEquals[Any]
     else false
 
   override def hashCode: Int = hash(Hash.fromUniversalHashCode[A])
@@ -580,73 +580,74 @@ sealed abstract private[data] class ChainInstances extends ChainInstances1 {
     def combine(c: Chain[A], c2: Chain[A]): Chain[A] = Chain.concat(c, c2)
   }
 
-  implicit val catsDataInstancesForChain
-    : Traverse[Chain] with Alternative[Chain] with Monad[Chain] with CoflatMap[Chain] =
-    new Traverse[Chain] with Alternative[Chain] with Monad[Chain] with CoflatMap[Chain] {
-      def foldLeft[A, B](fa: Chain[A], b: B)(f: (B, A) => B): B =
-        fa.foldLeft(b)(f)
-      def foldRight[A, B](fa: Chain[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] =
-        Eval.defer(fa.foldRight(lb) { (a, lb) =>
-          Eval.defer(f(a, lb))
-        })
+  given as (Traverse[Chain] & Alternative[Chain] & Monad[Chain] & CoflatMap[Chain]) = ChainInstance
+  private[data] object ChainInstance extends ChainInstance
 
-      override def map[A, B](fa: Chain[A])(f: A => B): Chain[B] = fa.map(f)
-      override def toList[A](fa: Chain[A]): List[A] = fa.toList
-      override def isEmpty[A](fa: Chain[A]): Boolean = fa.isEmpty
-      override def exists[A](fa: Chain[A])(p: A => Boolean): Boolean = fa.exists(p)
-      override def forall[A](fa: Chain[A])(p: A => Boolean): Boolean = fa.forall(p)
-      override def find[A](fa: Chain[A])(f: A => Boolean): Option[A] = fa.find(f)
-      override def size[A](fa: Chain[A]): Long = fa.length
-      override def collectFirst[A, B](fa: Chain[A])(pf: PartialFunction[A, B]): Option[B] = fa.collectFirst(pf)
-      override def collectFirstSome[A, B](fa: Chain[A])(f: A => Option[B]): Option[B] = fa.collectFirstSome(f)
+  private[data] class ChainInstance extends Traverse[Chain] with Alternative[Chain] with Monad[Chain] with CoflatMap[Chain] {
+    def foldLeft[A, B](fa: Chain[A], b: B)(f: (B, A) => B): B =
+      fa.foldLeft(b)(f)
+    def foldRight[A, B](fa: Chain[A], lb: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] =
+      Eval.defer(fa.foldRight(lb) { (a, lb) =>
+        Eval.defer(f(a, lb))
+      })
 
-      def coflatMap[A, B](fa: Chain[A])(f: Chain[A] => B): Chain[B] = {
-        @tailrec def go(as: Chain[A], res: ListBuffer[B]): Chain[B] =
-          as.uncons match {
-            case Some((_, t)) => go(t, res += f(as))
-            case None         => Chain.fromSeq(res.result())
-          }
+    override def map[A, B](fa: Chain[A])(f: A => B): Chain[B] = fa.map(f)
+    override def toList[A](fa: Chain[A]): List[A] = fa.toList
+    override def isEmpty[A](fa: Chain[A]): Boolean = fa.isEmpty
+    override def exists[A](fa: Chain[A])(p: A => Boolean): Boolean = fa.exists(p)
+    override def forall[A](fa: Chain[A])(p: A => Boolean): Boolean = fa.forall(p)
+    override def find[A](fa: Chain[A])(f: A => Boolean): Option[A] = fa.find(f)
+    override def size[A](fa: Chain[A]): Long = fa.length
+    override def collectFirst[A, B](fa: Chain[A])(pf: PartialFunction[A, B]): Option[B] = fa.collectFirst(pf)
+    override def collectFirstSome[A, B](fa: Chain[A])(f: A => Option[B]): Option[B] = fa.collectFirstSome(f)
 
-        go(fa, ListBuffer.empty)
-      }
-
-      def traverse[G[_], A, B](fa: Chain[A])(f: A => G[B])(implicit G: Applicative[G]): G[Chain[B]] =
-        fa.foldRight[G[Chain[B]]](G.pure(nil)) { (a, gcatb) =>
-          G.map2(f(a), gcatb)(_ +: _)
+    def coflatMap[A, B](fa: Chain[A])(f: Chain[A] => B): Chain[B] = {
+      @tailrec def go(as: Chain[A], res: ListBuffer[B]): Chain[B] =
+        as.uncons match {
+          case Some((_, t)) => go(t, res += f(as))
+          case None         => Chain.fromSeq(res.result())
         }
-      def empty[A]: Chain[A] = Chain.nil
-      def combineK[A](c: Chain[A], c2: Chain[A]): Chain[A] = Chain.concat(c, c2)
-      def pure[A](a: A): Chain[A] = Chain.one(a)
-      def flatMap[A, B](fa: Chain[A])(f: A => Chain[B]): Chain[B] =
-        fa.flatMap(f)
-      def tailRecM[A, B](a: A)(f: A => Chain[Either[A, B]]): Chain[B] = {
-        var acc: Chain[B] = Chain.nil
-        @tailrec def go(rest: List[Chain[Either[A, B]]]): Unit =
-          rest match {
-            case hd :: tl =>
-              hd.uncons match {
-                case Some((hdh, hdt)) =>
-                  hdh match {
-                    case Right(b) =>
-                      acc = acc :+ b
-                      go(hdt :: tl)
-                    case Left(a) =>
-                      go(f(a) :: hdt :: tl)
-                  }
-                case None =>
-                  go(tl)
-              }
-            case _ => ()
-          }
-        go(f(a) :: Nil)
-        acc
-      }
+
+      go(fa, ListBuffer.empty)
     }
+
+    def traverse[G[_], A, B](fa: Chain[A])(f: A => G[B])(implicit G: Applicative[G]): G[Chain[B]] =
+      fa.foldRight[G[Chain[B]]](G.pure(nil)) { (a, gcatb) =>
+        G.map2(f(a), gcatb)(_ +: _)
+      }
+    def empty[A]: Chain[A] = Chain.nil
+    def combineK[A](c: Chain[A], c2: Chain[A]): Chain[A] = Chain.concat(c, c2)
+    def pure[A](a: A): Chain[A] = Chain.one(a)
+    def flatMap[A, B](fa: Chain[A])(f: A => Chain[B]): Chain[B] =
+      fa.flatMap(f)
+    def tailRecM[A, B](a: A)(f: A => Chain[Either[A, B]]): Chain[B] = {
+      var acc: Chain[B] = Chain.nil
+      @tailrec def go(rest: List[Chain[Either[A, B]]]): Unit =
+        rest match {
+          case hd :: tl =>
+            hd.uncons match {
+              case Some((hdh, hdt)) =>
+                hdh match {
+                  case Right(b) =>
+                    acc = acc :+ b
+                    go(hdt :: tl)
+                  case Left(a) =>
+                    go(f(a) :: hdt :: tl)
+                }
+              case None =>
+                go(tl)
+            }
+          case _ => ()
+        }
+      go(f(a) :: Nil)
+      acc
+    }
+  }
 
   implicit def catsDataShowForChain[A](implicit A: Show[A]): Show[Chain[A]] =
     Show.show[Chain[A]](_.show)
 
-  implicit def catsDataOrderForChain[A](implicit A0: Order[A]): Order[Chain[A]] =
+  given OrderForChain[A] as Order[Chain[A]] given (A0: Order[A]) =
     new Order[Chain[A]] with ChainPartialOrder[A] {
       implicit def A: PartialOrder[A] = A0
       def compare(x: Chain[A], y: Chain[A]): Int =
@@ -668,7 +669,7 @@ sealed abstract private[data] class ChainInstances extends ChainInstances1 {
     }
 
   implicit val catsDataTraverseFilterForChain: TraverseFilter[Chain] = new TraverseFilter[Chain] {
-    def traverse: Traverse[Chain] = Chain.catsDataInstancesForChain
+    def traverse: Traverse[Chain] = the[Traverse[Chain]]
 
     override def filter[A](fa: Chain[A])(f: A => Boolean): Chain[A] = fa.filter(f)
 
@@ -704,7 +705,7 @@ sealed abstract private[data] class ChainInstances2 extends ChainInstances3 {
 }
 
 sealed abstract private[data] class ChainInstances3 {
-  implicit def catsDataEqForChain[A](implicit A: Eq[A]): Eq[Chain[A]] = new Eq[Chain[A]] {
+  given [A] as Eq[Chain[A]] given (A: Eq[A]) {
     def eqv(x: Chain[A], y: Chain[A]): Boolean = x === y
   }
 }
