@@ -14,7 +14,7 @@ val testDependencies = Seq(
 )
 
 val baseSettings = Seq(
-  scalaVersion := "0.18.0-bin-20190725-8095c23-NIGHTLY",
+  scalaVersion := "0.18.0-bin-20190727-bc81953-NIGHTLY",
   //scalaVersion := "0.17.0-bin-20190711-e2130b9-NIGHTLY",
   scalacOptions ++= Seq("-Ykind-projector"),
   libraryDependencies ++= testDependencies.map(_ % Test).map(_.withDottyCompat(scalaVersion.value)),
