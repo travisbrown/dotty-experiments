@@ -208,36 +208,34 @@ abstract private[data] class AndThenInstances0 extends AndThenInstances1 {
    * [[cats.arrow.CommutativeArrow CommutativeArrow]] instances
    * for [[AndThen]].
    */
-  implicit val catsDataArrowForAndThen: ArrowChoice[AndThen] with CommutativeArrow[AndThen] =
-    new ArrowChoice[AndThen] with CommutativeArrow[AndThen] {
-      // Piggybacking on the instance for Function1
-      private[this] val fn1 = the[ArrowChoice[Function1]]
+  given as (ArrowChoice[AndThen] & CommutativeArrow[AndThen]) = new ArrowChoice[AndThen] with CommutativeArrow[AndThen] {
+    // Piggybacking on the instance for Function1
+    private[this] val fn1 = the[ArrowChoice[Function1]]
 
-      def choose[A, B, C, D](f: AndThen[A, C])(g: AndThen[B, D]): AndThen[Either[A, B], Either[C, D]] =
-        AndThen(fn1.choose(f)(g))
+    def choose[A, B, C, D](f: AndThen[A, C])(g: AndThen[B, D]): AndThen[Either[A, B], Either[C, D]] =
+      AndThen(fn1.choose(f)(g))
 
-      def lift[A, B](f: A => B): AndThen[A, B] =
-        AndThen(f)
+    def lift[A, B](f: A => B): AndThen[A, B] =
+      AndThen(f)
 
-      def first[A, B, C](fa: AndThen[A, B]): AndThen[(A, C), (B, C)] =
-        AndThen(fn1.first(fa))
+    def first[A, B, C](fa: AndThen[A, B]): AndThen[(A, C), (B, C)] =
+      AndThen(fn1.first(fa))
 
-      override def split[A, B, C, D](f: AndThen[A, B], g: AndThen[C, D]): AndThen[(A, C), (B, D)] =
-        AndThen(fn1.split(f, g))
+    override def split[A, B, C, D](f: AndThen[A, B], g: AndThen[C, D]): AndThen[(A, C), (B, D)] =
+      AndThen(fn1.split(f, g))
 
-      def compose[A, B, C](f: AndThen[B, C], g: AndThen[A, B]): AndThen[A, C] =
-        f.compose(g)
-    }
+    def compose[A, B, C](f: AndThen[B, C], g: AndThen[A, B]): AndThen[A, C] =
+      f.compose(g)
+  }
 }
 
-abstract private[data] class AndThenInstances1 {
+private class AndThenInstances1 {
 
   /**
    * [[cats.Contravariant]] instance for [[AndThen]].
    */
-  implicit def catsDataContravariantForAndThen[R]: Contravariant[[a] =>> AndThen[a, R]] =
-    new Contravariant[[a] =>> AndThen[a, R]] {
-      def contramap[T1, T0](fa: AndThen[T1, R])(f: T0 => T1): AndThen[T0, R] =
-        fa.compose(f)
-    }
+  given [R] as Contravariant[[x] =>> AndThen[x, R]] {
+    def contramap[T1, T0](fa: AndThen[T1, R])(f: T0 => T1): AndThen[T0, R] =
+      fa.compose(f)
+  }
 }
