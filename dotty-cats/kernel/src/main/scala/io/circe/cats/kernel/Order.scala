@@ -1,11 +1,5 @@
 package io.circe.cats.kernel
 
-import io.circe.cats.kernel.instances.TupleOrderInstances
-import java.util.UUID
-import scala.collection.immutable.{Queue, SortedSet}
-import scala.concurrent.duration.{Duration, FiniteDuration}
-import scala.specialized
-
 /**
  * The `Order` type class is used to define a total ordering on some type `A`.
  * An order is defined by a relation <=, which obeys the following laws:
@@ -102,7 +96,7 @@ trait Order[@specialized A] extends Any with PartialOrder[A] { self =>
   }
 }
 
-object Order extends TupleOrderInstances {
+object Order {
 
   /**
    * Access a given `Order[A]`.
@@ -221,30 +215,5 @@ object Order extends TupleOrderInstances {
   def comparison[@specialized A](x: A, y: A) given (A: Order[A]): Comparison =
     A.comparison(x, y)
 
-  given as Order[Unit] = io.circe.cats.kernel.instances.UnitInstance
-  given as Order[Boolean] = io.circe.cats.kernel.instances.BooleanInstance
-  given as Order[Byte] = io.circe.cats.kernel.instances.ByteInstance
-  given as Order[Int] = io.circe.cats.kernel.instances.IntInstance
-  given as Order[Short] = io.circe.cats.kernel.instances.ShortInstance
-  given as Order[Long] = io.circe.cats.kernel.instances.LongInstance
-  given as Order[BigInt] = io.circe.cats.kernel.instances.BigIntInstance
-  given as Order[BigDecimal] = io.circe.cats.kernel.instances.BigDecimalInstance
-  given as Order[Duration] = io.circe.cats.kernel.instances.DurationInstance
-  given as Order[FiniteDuration] = io.circe.cats.kernel.instances.FiniteDurationInstance
-  given as Order[Double] = io.circe.cats.kernel.instances.DoubleInstance
-  given as Order[Float] = io.circe.cats.kernel.instances.FloatInstance
-  given as Order[Char] = io.circe.cats.kernel.instances.CharInstance
-  given as Order[Symbol] = io.circe.cats.kernel.instances.SymbolInstance
-  given as Order[String] = io.circe.cats.kernel.instances.StringInstance
-  given as Order[UUID] = io.circe.cats.kernel.instances.UUIDInstance
-
-  given [A] as Order[Option[A]] given Order[A] = io.circe.cats.kernel.instances.OptionOrder[A]
-  given [A] as Order[List[A]] given Order[A] = io.circe.cats.kernel.instances.ListOrder[A]
-  given [A] as Order[Vector[A]] given Order[A] = io.circe.cats.kernel.instances.VectorOrder[A]
-  given [A] as Order[Stream[A]] given Order[A] = io.circe.cats.kernel.instances.StreamOrder[A]
-  given [A] as Order[Queue[A]] given Order[A] = io.circe.cats.kernel.instances.QueueOrder[A]
-  given [A] as Order[SortedSet[A]] given Order[A] = io.circe.cats.kernel.instances.SortedSetOrder[A]
-
   given [A] as Ordering[A] given (A: Order[A]) = A.toOrdering
-  given [A] as PartialOrder[() => A] given PartialOrder[A] = new io.circe.cats.kernel.instances.Function0PartialOrder[A]
 }

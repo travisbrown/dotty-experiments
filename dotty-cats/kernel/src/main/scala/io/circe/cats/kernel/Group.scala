@@ -1,11 +1,9 @@
 package io.circe.cats.kernel
 
-import scala.{specialized => sp}
-
 /**
  * A group is a monoid where each element has an inverse.
  */
-trait Group[@sp(Int, Long, Float, Double) A] extends Any with Monoid[A] {
+trait Group[@specialized(Int, Long, Float, Double) A] extends Any with Monoid[A] {
 
   /**
    * Find the inverse of `a`.
@@ -61,10 +59,10 @@ trait Group[@sp(Int, Long, Float, Double) A] extends Any with Monoid[A] {
 }
 
 private[kernel] abstract class GroupFunctions[G[T] <: Group[T]] extends MonoidFunctions[G] {
-  def inverse[@sp(Int, Long, Float, Double) A](a: A) given (A: G[A]): A =
+  def inverse[@specialized(Int, Long, Float, Double) A](a: A) given (A: G[A]): A =
     A.inverse(a)
 
-  def remove[@sp(Int, Long, Float, Double) A](x: A, y: A) given (A: G[A]): A =
+  def remove[@specialized(Int, Long, Float, Double) A](x: A, y: A) given (A: G[A]): A =
     A.remove(x, y)
 }
 
@@ -74,9 +72,4 @@ object Group extends GroupFunctions[Group] {
    * Access a given `Group[A]`.
    */
   def apply[A] given (A: Group[A]): Group[A] = A
-
-  given [A] as Group[A] given (A: CommutativeGroup[A]) = A
-
-  given [A] as Group[() => A] given Group[A] = io.circe.cats.kernel.instances.Function0Group[A]
-  given [A, B] as Group[A => B] given Group[B] = io.circe.cats.kernel.instances.Function1Group[A, B]
 }

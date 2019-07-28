@@ -4,7 +4,7 @@ import io.circe.cats.kernel.{Eq, BoundedSemilattice}
 import io.circe.cats.kernel.laws.BoundedSemilatticeLaws
 import org.scalacheck.{Arbitrary, Prop}
 
-trait BoundedSemilatticeTests[A] extends CommutativeMonoidTests[A] with SemilatticeTests[A] with io.circe.cats.kernel.instances.TupleBoundedSemilatticeInstances {
+trait BoundedSemilatticeTests[A] extends CommutativeMonoidTests[A] with SemilatticeTests[A] {
   def laws: BoundedSemilatticeLaws[A]
 
   def boundedSemilattice given Arbitrary[A], Eq[A]: RuleSet =

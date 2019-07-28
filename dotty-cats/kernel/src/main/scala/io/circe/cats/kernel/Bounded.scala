@@ -3,7 +3,6 @@ package io.circe.cats.kernel
 import java.util.UUID
 import scala.collection.immutable.BitSet
 import scala.concurrent.duration.{Duration, FiniteDuration}
-import scala.specialized
 
 /**
  * A type class used to name the lower limit of a type.

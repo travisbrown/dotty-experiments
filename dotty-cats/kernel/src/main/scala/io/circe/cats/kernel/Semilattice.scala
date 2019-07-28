@@ -1,8 +1,5 @@
 package io.circe.cats.kernel
 
-import io.circe.cats.kernel.instances.TupleSemilatticeInstances
-import scala.specialized
-
 /**
  * Semilattices are commutative semigroups whose operation
  * (i.e. combine) is also idempotent.
@@ -54,7 +51,7 @@ trait Semilattice[@specialized(Int, Long, Float, Double) A] extends Any with Ban
     }
 }
 
-private[kernel] abstract class SemilatticeFunctions[S[T] <: Semilattice[T]] extends SemigroupFunctions[S] with TupleSemilatticeInstances {
+private[kernel] abstract class SemilatticeFunctions[S[T] <: Semilattice[T]] extends SemigroupFunctions[S] {
   def asMeetPartialOrder[A] given S[A], Eq[A]: PartialOrder[A] =
     the[S[A]].asMeetPartialOrder
   def asJoinPartialOrder[A] given S[A], Eq[A]: PartialOrder[A] =
@@ -74,8 +71,4 @@ object Semilattice extends SemilatticeFunctions[Semilattice] {
   def instance[A](cmb: (A, A) => A): Semilattice[A] = new Semilattice[A] {
     override def combine(x: A, y: A): A = cmb(x, y)
   }
-
-  given [A] as Semilattice[A] given (A: BoundedSemilattice[A]) = A
-  given [A] as Semilattice[() => A] given Semilattice[A] = io.circe.cats.kernel.instances.Function0Semilattice[A]
-  given [A, B] as Semilattice[A => B] given Semilattice[B] = io.circe.cats.kernel.instances.Function1Semilattice[A, B]
 }

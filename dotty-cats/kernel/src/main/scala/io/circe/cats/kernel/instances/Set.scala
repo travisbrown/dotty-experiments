@@ -1,6 +1,6 @@
 package io.circe.cats.kernel.instances
 
-import io.circe.cats.kernel.{Hash, PartialOrder}
+import io.circe.cats.kernel.{BoundedSemilattice, Hash, PartialOrder}
 
 private[kernel] class SetInstance[A] extends PartialOrder[Set[A]] with Hash[Set[A]] {
   def partialCompare(x: Set[A], y: Set[A]): Double =
@@ -15,4 +15,9 @@ private[kernel] class SetInstance[A] extends PartialOrder[Set[A]] with Hash[Set[
 
   // Does not require a Hash on elements: Scala sets must use the universal `hashCode`.
   def hash(x: Set[A]): Int = x.hashCode()
+}
+
+private[kernel] class SetBoundedSemilattice[A] extends BoundedSemilattice[Set[A]] {
+  def empty: Set[A] = Set.empty
+  def combine(x: Set[A], y: Set[A]): Set[A] = x | y
 }

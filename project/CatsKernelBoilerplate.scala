@@ -138,7 +138,7 @@ object CatsKernelBoilerplate {
     def instances: Seq[InstanceDef] =
       Seq(
         InstanceDef(
-          "private[kernel] trait TupleBandInstances {",
+          "private trait TupleBandInstances extends TupleSemigroupInstances {",
           tv =>
             new TemplatedBlock(tv) {
               import tv._
@@ -151,7 +151,7 @@ object CatsKernelBoilerplate {
             }
         ),
         InstanceDef(
-          "private[kernel] trait TupleBoundedSemilatticeInstances {",
+          "private trait TupleBoundedSemilatticeInstances extends TupleGroupInstances {",
           tv =>
             new TemplatedBlock(tv) {
               import tv._
@@ -167,7 +167,7 @@ object CatsKernelBoilerplate {
             }
         ),
         InstanceDef(
-          "private[kernel] trait TupleCommutativeGroupInstances {",
+          "private[kernel] trait TupleCommutativeGroupInstances extends TupleBoundedSemilatticeInstances {",
           tv =>
             new TemplatedBlock(tv) {
               import tv._
@@ -184,7 +184,7 @@ object CatsKernelBoilerplate {
             }
         ),
         InstanceDef(
-          "private[kernel] trait TupleCommutativeMonoidInstances {",
+          "private trait TupleCommutativeMonoidInstances extends TupleSemilatticeInstances {",
           tv =>
             new TemplatedBlock(tv) {
               import tv._
@@ -200,7 +200,7 @@ object CatsKernelBoilerplate {
             }
         ),
         InstanceDef(
-          "private[kernel] trait TupleCommutativeSemigroupInstances {",
+          "private trait TupleCommutativeSemigroupInstances extends TupleBandInstances {",
           tv =>
             new TemplatedBlock(tv) {
               import tv._
@@ -215,7 +215,7 @@ object CatsKernelBoilerplate {
             }
         ),
         InstanceDef(
-          "private[kernel] trait TupleEqInstances {",
+          "private trait TupleEqInstances {",
           tv =>
             new TemplatedBlock(tv) {
               import tv._
@@ -228,7 +228,7 @@ object CatsKernelBoilerplate {
             }
         ),
         InstanceDef(
-          "private[kernel] trait TupleGroupInstances {",
+          "private trait TupleGroupInstances extends TupleCommutativeMonoidInstances {",
           tv =>
             new TemplatedBlock(tv) {
               import tv._
@@ -243,7 +243,7 @@ object CatsKernelBoilerplate {
             }
         ),
         InstanceDef(
-          "private[kernel] trait TupleHashInstances {",
+          "private trait TupleHashInstances extends TupleEqInstances {",
           tv =>
             new TemplatedBlock(tv) {
               import tv._
@@ -258,7 +258,7 @@ object CatsKernelBoilerplate {
             }
         ),
         InstanceDef(
-          "private[kernel] trait TupleMonoidInstances {",
+          "private trait TupleMonoidInstances extends TupleCommutativeSemigroupInstances {",
           tv =>
             new TemplatedBlock(tv) {
               import tv._
@@ -272,7 +272,7 @@ object CatsKernelBoilerplate {
             }
         ),
         InstanceDef(
-          "private[kernel] trait TupleOrderInstances {",
+          "private[kernel] trait TupleOrderInstances extends TuplePartialOrderInstances {",
           tv =>
             new TemplatedBlock(tv) {
               import tv._
@@ -286,7 +286,7 @@ object CatsKernelBoilerplate {
             }
         ),
         InstanceDef(
-          "private[kernel] trait TuplePartialOrderInstances {",
+          "private trait TuplePartialOrderInstances extends TupleHashInstances {",
           tv =>
             new TemplatedBlock(tv) {
               import tv._
@@ -315,7 +315,7 @@ object CatsKernelBoilerplate {
             }
         ),
         InstanceDef(
-          "private[kernel] trait TupleSemilatticeInstances {",
+          "private trait TupleSemilatticeInstances extends TupleMonoidInstances {",
           tv =>
             new TemplatedBlock(tv) {
               import tv._

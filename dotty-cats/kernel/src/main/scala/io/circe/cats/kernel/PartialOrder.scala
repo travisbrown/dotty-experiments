@@ -1,9 +1,6 @@
 package io.circe.cats.kernel
 
-import io.circe.cats.kernel.instances.TuplePartialOrderInstances
 import java.lang.Double.isNaN
-import scala.collection.immutable.{BitSet, Queue}
-import scala.specialized
 
 /**
  * The `PartialOrder` type class is used to define a partial ordering on some type `A`.
@@ -104,7 +101,7 @@ trait PartialOrder[@specialized A] extends Any with Eq[A] { self =>
   def gt(x: A, y: A): Boolean = partialCompare(x, y) > 0
 }
 
-object PartialOrder extends TuplePartialOrderInstances {
+object PartialOrder {
 
   /**
    * Access a given `PartialOrder[A]`.
@@ -159,18 +156,6 @@ object PartialOrder extends TuplePartialOrderInstances {
     A.gteqv(x, y)
   def gt[@specialized A](x: A, y: A) given (A: PartialOrder[A]): Boolean =
     A.gt(x, y)
-
-  given as PartialOrder[BitSet] = io.circe.cats.kernel.instances.BitSetInstance
-
-  given [A] as PartialOrder[A] given (A: Order[A]) = A
-  given [A] as PartialOrder[Set[A]] = new io.circe.cats.kernel.instances.SetInstance[A]
-  given [A] as PartialOrder[Option[A]] given PartialOrder[A] = new io.circe.cats.kernel.instances.OptionPartialOrder[A]
-  given [A] as PartialOrder[List[A]] given PartialOrder[A] = new io.circe.cats.kernel.instances.ListPartialOrder[A]
-  given [A] as PartialOrder[Vector[A]] given PartialOrder[A] = new io.circe.cats.kernel.instances.VectorPartialOrder[A]
-  given [A] as PartialOrder[Stream[A]] given PartialOrder[A] = new io.circe.cats.kernel.instances.StreamPartialOrder[A]
-  given [A] as PartialOrder[Queue[A]] given PartialOrder[A] = new io.circe.cats.kernel.instances.QueuePartialOrder[A]
-
-  given [A] as PartialOrder[() => A] given PartialOrder[A] = new io.circe.cats.kernel.instances.Function0PartialOrder[A]
 
   given [A] as PartialOrdering[A] given (A: PartialOrder[A]) {
     def tryCompare(x: A, y: A): Option[Int] = A.tryCompare(x, y)

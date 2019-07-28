@@ -2,7 +2,7 @@ package io.circe.cats.kernel.laws
 
 import io.circe.cats.kernel.Band
 
-trait BandLaws[A] given (A: Band[A]) extends SemigroupLaws[A] with io.circe.cats.kernel.instances.TupleBandInstances {
+trait BandLaws[A] given (A: Band[A]) extends SemigroupLaws[A] {
   def idempotence(x: A): IsEq[A] =
     A.combine(x, x) <-> x
 }

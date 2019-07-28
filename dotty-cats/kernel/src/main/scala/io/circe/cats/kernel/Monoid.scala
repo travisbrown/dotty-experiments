@@ -1,9 +1,5 @@
 package io.circe.cats.kernel
 
-import io.circe.cats.kernel.instances.TupleMonoidInstances
-import scala.collection.immutable.{Queue, SortedMap}
-import scala.specialized
-
 /**
  * A monoid is a semigroup with an identity. A monoid is a specialization of a
  * semigroup, so its operation must be associative. Additionally,
@@ -97,7 +93,7 @@ private[kernel] abstract class MonoidFunctions[M[T] <: Monoid[T]] extends Semigr
     A.combineAll(as)
 }
 
-object Monoid extends MonoidFunctions[Monoid] with TupleMonoidInstances {
+object Monoid extends MonoidFunctions[Monoid] {
 
   /**
    * Access a given `Monoid[A]`.
@@ -112,16 +108,4 @@ object Monoid extends MonoidFunctions[Monoid] with TupleMonoidInstances {
 
     override def combine(x: A, y: A): A = cmb(x, y)
   }
-
-  given [A] as Monoid[A] given (A: CommutativeMonoid[A]) = A
-
-  given as Monoid[String] = io.circe.cats.kernel.instances.StringInstance
-  given [A] as Monoid[Option[A]] given Semigroup[A] = io.circe.cats.kernel.instances.OptionMonoid[A]
-  given [A] as Monoid[List[A]] = io.circe.cats.kernel.instances.ListMonoid[A]
-  given [A] as Monoid[Vector[A]] = io.circe.cats.kernel.instances.VectorMonoid[A]
-  given [A] as Monoid[Stream[A]] = io.circe.cats.kernel.instances.StreamMonoid[A]
-  given [A] as Monoid[Queue[A]] = io.circe.cats.kernel.instances.QueueMonoid[A]
-
-  given [A] as Monoid[() => A] given Monoid[A] = io.circe.cats.kernel.instances.Function0Monoid[A]
-  given [K, V] as Monoid[SortedMap[K, V]] given Order[K], Semigroup[V] = io.circe.cats.kernel.instances.SortedMapMonoid[K, V]
 }

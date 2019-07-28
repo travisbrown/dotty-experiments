@@ -1,6 +1,8 @@
 package io.circe.cats.kernel
 
-import io.circe.cats.kernel.instances.TupleSemigroupInstances
+import io.circe.cats.kernel.instances.TupleCommutativeGroupInstances
+import scala.collection.immutable.{BitSet, Queue, SortedMap, SortedSet}
+import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.annotation.tailrec
 
 /**
@@ -78,7 +80,7 @@ trait Semigroup[@specialized(Int, Long, Float, Double) A] extends Any with Seria
     as.reduceOption(combine)
 }
 
-private[kernel] abstract class SemigroupFunctions[S[T] <: Semigroup[T]] {
+private[kernel] trait SemigroupFunctions[S[T] <: Semigroup[T]] {
   def combine[@specialized(Int, Long, Float, Double) A](x: A, y: A) given (A: S[A]): A =
     A.combine(x, y)
 
@@ -101,7 +103,7 @@ private[kernel] abstract class SemigroupFunctions[S[T] <: Semigroup[T]] {
     A.combineAllOption(as)
 }
 
-object Semigroup extends SemigroupFunctions[Semigroup] with TupleSemigroupInstances {
+object Semigroup extends TupleCommutativeGroupInstances with SemilatticeInstances with SemigroupFunctions[Semigroup] {
 
   /**
    * Access a given `Semigroup[A]`.
@@ -115,7 +117,55 @@ object Semigroup extends SemigroupFunctions[Semigroup] with TupleSemigroupInstan
     def combine(x: A, y: A): A = cmb(x, y)
   }
 
-  given [A] as Semigroup[A] given (A: Monoid[A]) = A
+  given as (CommutativeGroup[Unit] & BoundedSemilattice[Unit]) = io.circe.cats.kernel.instances.UnitInstance
+  given as CommutativeGroup[Byte] = io.circe.cats.kernel.instances.ByteInstance
+  given as CommutativeGroup[Int] = io.circe.cats.kernel.instances.IntInstance
+  given as CommutativeGroup[Short] = io.circe.cats.kernel.instances.ShortInstance
+  given as CommutativeGroup[Long] = io.circe.cats.kernel.instances.LongInstance
+  given as CommutativeGroup[BigInt] = io.circe.cats.kernel.instances.BigIntInstance
+  given as CommutativeGroup[BigDecimal] = io.circe.cats.kernel.instances.BigDecimalInstance
+  given as CommutativeGroup[Duration] = io.circe.cats.kernel.instances.DurationInstance
+  given as CommutativeGroup[FiniteDuration] = io.circe.cats.kernel.instances.FiniteDurationInstance
+  given as CommutativeGroup[Double] = io.circe.cats.kernel.instances.DoubleInstance
+  given as CommutativeGroup[Float] = io.circe.cats.kernel.instances.FloatInstance
+
+  given as Monoid[String] = io.circe.cats.kernel.instances.StringInstance
+  given [A] as Monoid[Option[A]] given Semigroup[A] = io.circe.cats.kernel.instances.OptionMonoid[A]
+  given [A] as Monoid[List[A]] = io.circe.cats.kernel.instances.ListMonoid[A]
+  given [A] as Monoid[Vector[A]] = io.circe.cats.kernel.instances.VectorMonoid[A]
+  given [A] as Monoid[Stream[A]] = io.circe.cats.kernel.instances.StreamMonoid[A]
+  given [A] as Monoid[Queue[A]] = io.circe.cats.kernel.instances.QueueMonoid[A]
+
+  given [A] as BoundedSemilattice[Set[A]] = io.circe.cats.kernel.instances.SetBoundedSemilattice[A]
+  given as BoundedSemilattice[BitSet] = io.circe.cats.kernel.instances.BitSetInstance
+  given [A] as BoundedSemilattice[SortedSet[A]] given Order[A] = io.circe.cats.kernel.instances.SortedSetBoundedSemilattice[A]
+
+  given [A] as Group[() => A] given Group[A] = io.circe.cats.kernel.instances.Function0Group[A]
+  given [A, B] as Group[A => B] given Group[B] = io.circe.cats.kernel.instances.Function1Group[A, B]
+
+  given [K, V] as CommutativeMonoid[Map[K, V]] given Semigroup[V] = io.circe.cats.kernel.instances.MapCommutativeMonoid[K, V]
+  given [K, V] as CommutativeMonoid[SortedMap[K, V]] given Order[K], CommutativeSemigroup[V] = io.circe.cats.kernel.instances.SortedMapCommutativeMonoid[K, V]
+}
+
+private trait SemilatticeInstances extends MonoidInstances {
+  given [A] as Semilattice[() => A] given Semilattice[A] = io.circe.cats.kernel.instances.Function0Semilattice[A]
+  given [A, B] as Semilattice[A => B] given Semilattice[B] = io.circe.cats.kernel.instances.Function1Semilattice[A, B]
+}
+
+private trait MonoidInstances extends CommutativeSemigroupInstances  {
+  given [A] as Monoid[() => A] given Monoid[A] = io.circe.cats.kernel.instances.Function0Monoid[A]
+  given [K, V] as Monoid[SortedMap[K, V]] given Order[K], Semigroup[V] = io.circe.cats.kernel.instances.SortedMapMonoid[K, V]
+}
+
+private trait CommutativeSemigroupInstances extends BandInstances {
+  given [A] as CommutativeSemigroup[() => A] given CommutativeSemigroup[A] = io.circe.cats.kernel.instances.Function0CommutativeSemigroup[A]
+}
+
+private trait BandInstances extends SemigroupInstances {
+  given [A] as Band[() => A] given Band[A] = io.circe.cats.kernel.instances.Function0Band[A]
+}
+
+private trait SemigroupInstances {
   given [A] as Semigroup[() => A] given Semigroup[A] = io.circe.cats.kernel.instances.Function0Semigroup[A]
   given [A, B] as Semigroup[A => B] given Semigroup[B] = io.circe.cats.kernel.instances.Function1Semigroup[A, B]
 }
