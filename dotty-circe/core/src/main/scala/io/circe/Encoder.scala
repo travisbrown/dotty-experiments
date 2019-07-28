@@ -109,7 +109,7 @@ final object Encoder extends TupleEncoders with ProductEncoders with LiteralEnco
   import scala.deriving.{ Mirror, productElement }
   import scala.compiletime.{Shape, constValue, erasedValue, error}
 
-  inline def derived[A] given (A: Mirror.Of[A]): ObjectEncoder[A] = new ObjectEncoder[A] {
+  inline def derived[A] given (A: Mirror.Of[A]): AsObject[A] = new AsObject[A] {
     def encodeObject(a: A): JsonObject = {
       inline A match {
         case m: Mirror.ProductOf[A] => encodeElems[m.MirroredElemTypes, m.MirroredElemLabels](a, 0)
@@ -119,7 +119,7 @@ final object Encoder extends TupleEncoders with ProductEncoders with LiteralEnco
 
   inline def tryEncode[A](a: A): Json = delegate match {
     case encodeElem: Encoder[A] => encodeElem(a)
-    case _ => error("No `ObjectEncoder` delegate was found for $A")
+    case _ => error("No given `Encoder.AsObject` was found for $A")
   }
 
   inline def encodeElems[Elems <: Tuple, Labels <: Tuple](a: Any, n: Int): JsonObject = {
