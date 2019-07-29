@@ -162,6 +162,43 @@ object Eq extends EqFunctions[Eq] with TupleOrderInstances with PartialOrderInst
   given [A] as Order[Stream[A]] given Order[A] = io.circe.cats.kernel.instances.StreamOrder[A]
   given [A] as Order[Queue[A]] given Order[A] = io.circe.cats.kernel.instances.QueueOrder[A]
   given [A] as Order[SortedSet[A]] given Order[A] = io.circe.cats.kernel.instances.SortedSetOrder[A]
+
+  import scala.compiletime.{erasedValue, error}
+  import scala.deriving.{Mirror, productElement}
+
+  inline def derived[A] given (A: Mirror.Of[A]): Eq[A] = new Eq[A] {
+    def eqv(x: A, y: A): Boolean =
+      inline A match {
+        case m: Mirror.ProductOf[A] => eqElems[m.MirroredElemTypes](x, y, 0)
+        case m: Mirror.SumOf[A] =>
+          val ord = m.ordinal(x)
+          ord == m.ordinal(y) && eqCases[m.MirroredElemTypes](0)(x, y, ord)
+      }
+  }
+
+  inline def tryEq[A](x: A, y: A): Boolean = delegate match {
+    case eqElem: Eq[A] => eqElem.eqv(x, y)
+    case _ => error("No given `Eq` was found for A")
+  }
+
+  inline def eqElems[Elems <: Tuple](x: Any, y: Any, n: Int): Boolean =
+    inline erasedValue[Elems] match {
+      case _: (elem *: elems1) =>
+        val result = tryEq(productElement[elem](x, n), productElement[elem](y, n))
+        result && eqElems[elems1](x, y, n + 1)
+      case _: Unit => true
+    }
+
+  inline def eqCases[Alts](n: Int)(x: Any, y: Any, ord: Int): Boolean =
+    inline erasedValue[Alts] match {
+      case _: (alt *: alts1) =>
+        if (ord == n)
+          delegate match {
+            case m: Mirror.ProductOf[`alt`] => eqElems[m.MirroredElemTypes](x, y, 0)
+          }
+        else eqCases[alts1](n + 1)(x, y, ord)
+      case _: Unit => false
+    }
 }
 
 private trait PartialOrderInstances extends HashInstances {

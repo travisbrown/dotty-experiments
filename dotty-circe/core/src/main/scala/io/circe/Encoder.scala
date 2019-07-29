@@ -106,8 +106,8 @@ trait Encoder[A] extends Serializable { self =>
  * @author Travis Brown
  */
 final object Encoder extends TupleEncoders with ProductEncoders with LiteralEncoders with MidPriorityEncoders {
-  import scala.deriving.{ Mirror, productElement }
-  import scala.compiletime.{Shape, constValue, erasedValue, error}
+  import scala.compiletime.{constValue, erasedValue, error}
+  import scala.deriving.{Mirror, productElement}
 
   inline def derived[A] given (A: Mirror.Of[A]): AsObject[A] = new AsObject[A] {
     def encodeObject(a: A): JsonObject = {
