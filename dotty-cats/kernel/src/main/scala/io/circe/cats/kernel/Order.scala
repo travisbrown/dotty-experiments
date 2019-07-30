@@ -216,4 +216,44 @@ object Order {
     A.comparison(x, y)
 
   given [A] as Ordering[A] given (A: Order[A]) = A.toOrdering
+
+  import scala.compiletime.{erasedValue, error}
+  import scala.deriving.{Mirror, productElement}
+
+  inline def derived[A] given (A: Mirror.Of[A]): Order[A] = new Order[A] {
+    def compare(x: A, y: A): Int =
+      inline A match {
+        case m: Mirror.ProductOf[A] => orderElems[m.MirroredElemTypes](x, y, 0)
+        case m: Mirror.SumOf[A] =>
+          val ord = m.ordinal(x)
+          val result = ord.compare(m.ordinal(y))
+
+          if (result == 0) orderCases[m.MirroredElemTypes](0)(x, y, ord) else result
+      }
+  }
+
+  inline def tryOrder[A](x: A, y: A): Int = given match {
+    case orderElem: Order[A] => orderElem.compare(x, y)
+    case _ => error("No given `Order` was found for A")
+  }
+
+  inline def orderElems[Elems <: Tuple](x: Any, y: Any, n: Int): Int =
+    inline erasedValue[Elems] match {
+      case _: (elem *: elems1) =>
+        val result = tryOrder(productElement[elem](x, n), productElement[elem](y, n))
+
+        if (result == 0) orderElems[elems1](x, y, n + 1) else result
+      case _: Unit => 0
+    }
+
+  inline def orderCases[Alts](n: Int)(x: Any, y: Any, ord: Int): Int =
+    inline erasedValue[Alts] match {
+      case _: (alt *: alts1) =>
+        if (ord == n)
+          delegate match {
+            case m: Mirror.ProductOf[`alt`] => orderElems[m.MirroredElemTypes](x, y, 0)
+          }
+        else orderCases[alts1](n + 1)(x, y, ord)
+      case _: Unit => 0
+    }
 }

@@ -108,4 +108,42 @@ object Monoid extends MonoidFunctions[Monoid] {
 
     override def combine(x: A, y: A): A = cmb(x, y)
   }
+
+  import scala.compiletime.{erasedValue, error}
+  import scala.deriving.{Mirror, productElement}
+
+  inline def derived[A] given (A: Mirror.Of[A]): Monoid[A] =
+    new Monoid[A] {
+      val empty: A =
+        inline A match {
+          case m: Mirror.ProductOf[A] =>
+            m.fromProduct(emptyElems[m.MirroredElemTypes].asInstanceOf[Product])
+        }
+      def combine(x: A, y: A): A =
+        inline A match {
+          case m: Mirror.ProductOf[A] =>
+            m.fromProduct(combineElems[m.MirroredElemTypes](x, y, 0).asInstanceOf[Product])
+        }
+    }
+
+  inline def tryMonoid[A]: Monoid[A] = given match {
+    case monoidElem: Monoid[A] => monoidElem
+    case _ => error("No given `Monoid` was found for A")
+  }
+
+  inline def emptyElems[Elems <: Tuple]: Tuple =
+    inline erasedValue[Elems] match {
+      case _: (elem *: elems1) =>
+        (tryMonoid[elem].empty *: emptyElems[elems1])
+      case _: Unit => ()
+    }
+
+  inline def combineElems[Elems <: Tuple](x: Any, y: Any, n: Int): Tuple =
+    inline erasedValue[Elems] match {
+      case _: (elem *: elems1) =>
+        val result = tryMonoid[elem].combine(productElement[elem](x, n), productElement[elem](y, n))
+
+        (result *: combineElems[elems1](x, y, n + 1))
+      case _: Unit => ()
+    }
 }

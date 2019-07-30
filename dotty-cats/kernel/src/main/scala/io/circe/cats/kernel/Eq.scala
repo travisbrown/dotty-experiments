@@ -176,7 +176,7 @@ object Eq extends EqFunctions[Eq] with TupleOrderInstances with PartialOrderInst
       }
   }
 
-  inline def tryEq[A](x: A, y: A): Boolean = delegate match {
+  inline def tryEq[A](x: A, y: A): Boolean = given match {
     case eqElem: Eq[A] => eqElem.eqv(x, y)
     case _ => error("No given `Eq` was found for A")
   }
@@ -193,7 +193,7 @@ object Eq extends EqFunctions[Eq] with TupleOrderInstances with PartialOrderInst
     inline erasedValue[Alts] match {
       case _: (alt *: alts1) =>
         if (ord == n)
-          delegate match {
+          given match {
             case m: Mirror.ProductOf[`alt`] => eqElems[m.MirroredElemTypes](x, y, 0)
           }
         else eqCases[alts1](n + 1)(x, y, ord)
