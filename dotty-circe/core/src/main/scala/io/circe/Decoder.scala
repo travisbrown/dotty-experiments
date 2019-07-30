@@ -15,7 +15,6 @@ import cats.data.{
 }
 import cats.data.Validated.{ Invalid, Valid }
 import cats.kernel.Order
-import io.circe.exported.Exported
 import java.io.Serializable
 import java.time.{
   DateTimeException,
@@ -417,7 +416,10 @@ final object Decoder
 
   inline def derived[A] given (A: Mirror.Of[A]): Decoder[A] =
       inline A match {
-        case m: Mirror.ProductOf[A] => decodeElems[m.MirroredElemTypes, m.MirroredElemLabels](0).map(p => m.fromProduct(p.asInstanceOf[Product]))
+        case m: Mirror.ProductOf[A] =>
+          decodeElems[m.MirroredElemTypes, m.MirroredElemLabels](0).map(p =>
+            m.fromProduct(p.asInstanceOf[Product])
+          )
       }
 
   inline def tryDecoder[A]: Decoder[A] = delegate match {
@@ -1458,12 +1460,4 @@ final object Decoder
       s"Leftover keys: ${keys.mkString(", ")}"
     }
   }
-}
-
-private[circe] trait LowPriorityDecoders {
-
-  /**
-   * @group Prioritization
-   */
-  implicit def importedDecoder[A](implicit exported: Exported[Decoder[A]]): Decoder[A] = exported.instance
 }

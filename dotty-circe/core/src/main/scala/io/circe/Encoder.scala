@@ -2,7 +2,6 @@ package io.circe
 
 import cats.{ Contravariant, Foldable }
 import cats.data.{ Chain, NonEmptyChain, NonEmptyList, NonEmptyMap, NonEmptySet, NonEmptyVector, OneAnd, Validated }
-import io.circe.exported.Exported
 import java.io.Serializable
 import java.time.{
   Duration,
@@ -751,15 +750,6 @@ final object Encoder extends TupleEncoders with ProductEncoders with LiteralEnco
     final def apply[A](implicit instance: AsRoot[A]): AsRoot[A] = instance
   }
 
-  private[circe] class LowPriorityAsRootEncoders {
-
-    /**
-     * @group Prioritization
-     */
-    implicit final def importedAsRootEncoder[A](implicit exported: Exported[AsRoot[A]]): AsRoot[A] =
-      exported.instance
-  }
-
   /**
    * A type class that provides a conversion from a value of type `A` to a JSON
    * array.
@@ -829,15 +819,6 @@ final object Encoder extends TupleEncoders with ProductEncoders with LiteralEnco
     implicit final val arrayEncoderContravariant: Contravariant[AsArray] = new Contravariant[AsArray] {
       final def contramap[A, B](e: AsArray[A])(f: B => A): AsArray[B] = e.contramapArray(f)
     }
-  }
-
-  private[circe] class LowPriorityAsArrayEncoders {
-
-    /**
-     * @group Prioritization
-     */
-    implicit final def importedAsArrayEncoder[A](implicit exported: Exported[AsArray[A]]): AsArray[A] =
-      exported.instance
   }
 
   /**
@@ -910,17 +891,6 @@ final object Encoder extends TupleEncoders with ProductEncoders with LiteralEnco
       final def contramap[A, B](e: AsObject[A])(f: B => A): AsObject[B] = e.contramapObject(f)
     }
   }
-
-  private[circe] class LowPriorityAsObjectEncoders {
-
-    /**
-     * @group Prioritization
-     */
-    implicit final def importedAsObjectEncoder[A](
-      implicit
-      exported: Exported[AsObject[A]]
-    ): AsObject[A] = exported.instance
-  }
 }
 
 private[circe] trait MidPriorityEncoders extends LowPriorityEncoders {
@@ -950,12 +920,4 @@ private[circe] trait MidPriorityEncoders extends LowPriorityEncoders {
       builder.result()
     }
   }
-}
-
-private[circe] trait LowPriorityEncoders {
-
-  /**
-   * @group Prioritization
-   */
-  implicit final def importedEncoder[A](implicit exported: Exported[Encoder[A]]): Encoder[A] = exported.instance
 }
