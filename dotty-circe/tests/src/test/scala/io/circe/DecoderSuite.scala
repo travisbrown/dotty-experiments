@@ -10,7 +10,7 @@ import given cats.syntax.monoid._
 import cats.laws.discipline.{ MonadErrorTests, SemigroupKTests }
 import io.circe.CursorOp.{ DownArray, DownN }
 import io.circe.jawn.parse
-import io.circe.syntax._
+import given io.circe.syntax._
 import io.circe.testing.CodecTests
 import io.circe.tests.CirceSuite
 import io.circe.tests.examples.WrappedOptionalField

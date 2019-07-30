@@ -1,15 +1,13 @@
 package io.circe
 
 /**
- * This package provides syntax via enrichment classes.
+ * This package provides syntax via extension methods.
  */
 package object syntax {
-  implicit final class EncoderOps[A](val wrappedEncodeable: A) extends AnyVal {
-    final def asJson(implicit encoder: Encoder[A]): Json = encoder(wrappedEncodeable)
-    final def asJsonObject(implicit encoder: Encoder.AsObject[A]): JsonObject =
-      encoder.encodeObject(wrappedEncodeable)
-  }
-  implicit final class KeyOps[K](val key: K) extends AnyVal {
-    final def :=[A: Encoder](a: A)(implicit keyEncoder: KeyEncoder[K]): (String, Json) = (keyEncoder(key), a.asJson)
+  given [A] {
+    def (a: A) asJson given (A: Encoder[A]): Json = A(a)
+    def (a: A) asJsonObject given (A: Encoder.AsObject[A]): JsonObject =
+      A.encodeObject(a)
+    def (a: A) := [V](v: V) given (A: KeyEncoder[A], V: Encoder[V]) = (A(a), V(v))
   }
 }

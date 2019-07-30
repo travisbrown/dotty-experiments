@@ -7,7 +7,7 @@ object Spaces2PrinterSuite extends PrinterSuite(Printer.spaces2, jawn.`package`)
 object Spaces4PrinterSuite extends PrinterSuite(Printer.spaces4, jawn.`package`)
 object NoSpacesPrinterSuite extends PrinterSuite(Printer.noSpaces, jawn.`package`)
 object UnicodeEscapePrinterSuite extends PrinterSuite(Printer.noSpaces.copy(escapeNonAscii = true), jawn.`package`) {
-  import io.circe.syntax._
+  import given io.circe.syntax._
   test("Printing object should unicode-escape all non-ASCII chars") {
     val actual = Json.obj("0 ℃" := "32 ℉").pretty(printer)
     val expected = "{\"0 \\u2103\":\"32 \\u2109\"}"

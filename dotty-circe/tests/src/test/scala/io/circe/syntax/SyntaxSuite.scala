@@ -1,19 +1,24 @@
-package io.circe.syntax
+package io.circe.syntax_test
 
 import io.circe.{ Encoder, Json, KeyEncoder }
 import given io.circe.cats.syntax.eq._
+import given io.circe.syntax._
 import io.circe.tests.CirceSuite
 
 object SyntaxSuite extends CirceSuite {
   test("asJson should be available and work appropriately") {
     check1 { (s: String) =>
-      s.asJson === Json.fromString(s)
+      // This doesn't compile in-line (TODO: minimize).
+      val result = s.asJson
+      result === Json.fromString(s)
     }
   }
 
   test("asJsonObject should be available and work appropriately") {
     check1 { (m: Map[String, Int]) =>
-      m.asJsonObject === Encoder[Map[String, Int]].apply(m).asObject.get
+      // This doesn't compile in-line (TODO: minimize).
+      val result = m.asJsonObject
+      result === Encoder[Map[String, Int]].apply(m).asObject.get
     }
   }
 

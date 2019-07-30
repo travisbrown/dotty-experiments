@@ -4,7 +4,7 @@ import cats.data.Chain
 import cats.laws.discipline.arbitrary._
 import cats.laws.discipline.ContravariantTests
 import given cats.syntax.eq._
-import io.circe.syntax._
+import given io.circe.syntax._
 import io.circe.tests.CirceSuite
 import org.scalacheck.Arbitrary
 import scala.collection.SortedMap
