@@ -12,8 +12,11 @@ import given io.circe.cats.syntax.applicative._
 import given io.circe.cats.syntax.eq._
 import given io.circe.cats.syntax.writer._
 import io.circe.cats.tests.CatsSuite
+import org.scalacheck.Test.Parameters
 
 object NonEmptyChainSuite extends CatsSuite {
+  override def checkConfig: Parameters = Parameters.default.withMaxSize(5)
+
   checkAll("NonEmptyChain[Int]", SemigroupKTests[NonEmptyChain].semigroupK[Int])
   checkAll("SemigroupK[NonEmptyChain]", SerializableTests.serializable(SemigroupK[NonEmptyChain]))
 
