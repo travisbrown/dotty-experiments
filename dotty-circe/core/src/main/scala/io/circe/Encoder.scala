@@ -104,7 +104,7 @@ trait Encoder[A] extends Serializable { self =>
  *
  * @author Travis Brown
  */
-final object Encoder extends TupleEncoders with ProductEncoders with LiteralEncoders with MidPriorityEncoders {
+object Encoder extends TupleEncoders with ProductEncoders with LiteralEncoders with MidPriorityEncoders {
   import scala.compiletime.{constValue, erasedValue, error}
   import scala.deriving.{Mirror, productElement}
 
@@ -473,6 +473,14 @@ final object Encoder extends TupleEncoders with ProductEncoders with LiteralEnco
     final protected def toIterator(a: M[K, V]): Iterator[(K, V)] = ev(a).iterator
   }
 
+  def encodeUnion[A, B](implicit A: Encoder[A], B: Encoder[B]): Encoder[A | B] =
+    new Encoder[A | B] {
+      def apply(a: A | B): Json = a match {
+        case a: A => A(a)
+        case b: B => B(b)
+      }
+    }
+
   /**
    * @group Disjunction
    */
@@ -740,7 +748,7 @@ final object Encoder extends TupleEncoders with ProductEncoders with LiteralEnco
    *
    * @author Travis Brown
    */
-  final object AsRoot extends LowPriorityAsRootEncoders {
+  object AsRoot {
 
     /**
      * Return an instance for a given type.
@@ -795,7 +803,7 @@ final object Encoder extends TupleEncoders with ProductEncoders with LiteralEnco
    *
    * @author Travis Brown
    */
-  final object AsArray extends LowPriorityAsArrayEncoders {
+  object AsArray {
 
     /**
      * Return an instance for a given type.
@@ -866,7 +874,7 @@ final object Encoder extends TupleEncoders with ProductEncoders with LiteralEnco
    *
    * @author Travis Brown
    */
-  final object AsObject extends LowPriorityAsObjectEncoders {
+  object AsObject {
 
     /**
      * Return an instance for a given type.
@@ -893,7 +901,7 @@ final object Encoder extends TupleEncoders with ProductEncoders with LiteralEnco
   }
 }
 
-private[circe] trait MidPriorityEncoders extends LowPriorityEncoders {
+private[circe] trait MidPriorityEncoders {
 
   /**
    * @group Collection

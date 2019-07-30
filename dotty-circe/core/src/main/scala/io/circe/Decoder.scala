@@ -403,14 +403,13 @@ trait Decoder[A] extends Serializable { self =>
  *
  * @author Travis Brown
  */
-final object Decoder
+object Decoder
     extends CollectionDecoders
     with TupleDecoders
     with ProductDecoders
-    with LiteralDecoders
-    with LowPriorityDecoders {
+    with LiteralDecoders {
   import scala.deriving.{ Mirror, productElement }
-  import scala.compiletime.{Shape, constValue, erasedValue, error}
+  import scala.compiletime.{constValue, erasedValue, error}
 
   private val alwaysUnitDecoder: Decoder[Unit] = Decoder.const(())
 
@@ -1093,6 +1092,9 @@ final object Decoder
         (h, t) => NonEmptyChain.fromChainPrepend(h, t)
     }
 
+  def decodeUnion[A, B](implicit A: Decoder[A], B: Decoder[B]): Decoder[A | B] =
+    decoderInstances.widen[A, A | B](A).or(decoderInstances.widen[B, A | B](B))
+
   /**
    * @group Disjunction
    */
@@ -1427,7 +1429,7 @@ final object Decoder
    *
    * @group Utilities
    */
-  final object state {
+  object state {
 
     /**
      * Attempt to decode a value at key `k` and remove it from the [[ACursor]].
