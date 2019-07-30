@@ -39,9 +39,10 @@ val root =
                circeCore,
                circeRs,
                circeJawn,
+               circeLiteral,
                circeTesting,
                circeTests)
-    .dependsOn(circeJawn, circeTesting)
+    .dependsOn(circeJawn, circeLiteral, circeTesting)
 
 lazy val catsKernel = project
   .in(file("dotty-cats/kernel"))

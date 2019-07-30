@@ -613,6 +613,7 @@ object Foldable {
       def (fa: F[A]) foldMapM[G[_], B](f: A => G[B]) given (F: Foldable[F], G: Monad[G], B: Monoid[B]): G[B] = F.foldMapM(fa)(f)
       def (fa: F[A]) traverse_[G[_], B](f: A => G[B]) given (F: Foldable[F], G: Applicative[G]): G[Unit] = F.traverse_(fa)(f)
       def (fa: F[A]) find(f: A => Boolean) given (F: Foldable[F]): Option[A] = F.find(fa)(f)
+      def (fa: F[A]) intercalate(a: A) given (F: Foldable[F], A: Monoid[A]): A = F.intercalate(fa, a)
     }
 
     given [F[_], G[_], A] given (F: Foldable[F]) {

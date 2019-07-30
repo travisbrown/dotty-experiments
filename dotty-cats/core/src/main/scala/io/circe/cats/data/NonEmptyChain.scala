@@ -491,7 +491,7 @@ sealed abstract private[data] class NonEmptyChainInstances1 extends NonEmptyChai
 }
 
 sealed abstract private[data] class NonEmptyChainInstances2 {
-  given [A] as Eq[NonEmptyChain[A]] given (A: Eq[A]) {
+  given [A] as Eq[NonEmptyChain[A]] given Eq[A] {
     def eqv(x: NonEmptyChain[A], y: NonEmptyChain[A]): Boolean = x.toChain === y.toChain
   }
 }
