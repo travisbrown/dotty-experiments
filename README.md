@@ -2,7 +2,7 @@
 
 [![Build status](https://img.shields.io/travis/travisbrown/dotty-experiments/master.svg)](https://travis-ci.org/travisbrown/dotty-experiments)
 
-This is an experimental project that ports [Circe][circe] and [Cats][cats] from Scala 2 to Dotty,
+This is an experimental and opinionated port of [Circe][circe] and [Cats][cats] from Scala 2 to [Dotty][dotty],
 a language and compiler that will become Scala 3.
 
 ## Motivation
