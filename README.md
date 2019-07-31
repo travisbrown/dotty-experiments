@@ -45,6 +45,46 @@ few major differences between its implementation and the original Scala 2 librar
 
 I'm likely to keep playing with this, and will probably publish artifacts at some point.
 
+## Prior art
+
+Michael Pilquist's [Spotted Leopards](https://github.com/typelevel/spotted-leopards) project is a
+similar experiment that takes a very different approach, pushing extension methods to the foreground
+by making them the basis of Cats's type class interfaces. Here's an example of what this approach
+might look like:
+
+```scala
+scala> trait Functor[F[_]] {
+     |   def (fa: F[A]) fmap[A, B](f: A => B): F[B]
+     | }
+     |
+     | object Functor {
+     |   given as Functor[Option] {
+     |     def (fa: Option[A]) fmap[A, B](f: A => B): Option[B] = fa.map(f)
+     |   }  
+     | }
+// defined trait Functor
+// defined object Functor
+
+scala> the[Functor[Option]].fmap(Option(0))(_ + 1)
+val res0: Option[Int] = Some(1)
+
+scala> import given Functor._
+
+scala> Option(0).fmap(_ + 1)
+val res1: Option[Int] = Some(1)
+```
+
+This is a modification of the approach in Spotted Leopards in that I've put the `Functor[Option]`
+instance into implicit scope, while in Spotted Leopards instances must be imported, which means
+that the instances and their syntax come together—it's not possible (I think?) to put the instances
+into scope without also getting their syntax. This makes me really uncomfortable; your mileage may
+vary.
+
+There are things I like about the modified version of this approach above (e.g. much less
+repetition, since the syntax constitutes the type class operations directly). It seems odd to me to
+import instances that are already in implicit scope to get syntax, though, and supporting a kitchen-sink
+`syntax` import could be tricky.
+
 ## Licenses
 
 ### Circe
