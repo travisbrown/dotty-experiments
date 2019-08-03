@@ -1,0 +1,8 @@
+dist: xenial
+language: scala
+
+jdk:
+  - openjdk8
+
+script:
+  - sbt test
