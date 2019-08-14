@@ -105,7 +105,7 @@ sealed abstract class Ior[+A, +B] extends Product with Serializable {
     fold(_ => lc, f(_, lc), (_, b) => f(b, lc))
 
   final def merge[AA >: A] given (ev: B <:< AA, AA: Semigroup[AA]): AA =
-    fold(identity, ev, (a, b) => AA.combine(a, b))
+    fold(identity, ev, (a, b) => AA.combine(a, ev(b)))
   final def mergeLeft[AA >: A] given (ev: B <:< AA): AA =
     fold(identity, ev, (a, _) => a)
   final def mergeRight[AA >: A] given (ev: B <:< AA): AA =
